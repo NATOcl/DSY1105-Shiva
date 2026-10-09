@@ -1,6 +1,5 @@
 package cl.duoc.tecmundo
 
-import android.graphics.Color.red
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.Red
 import cl.duoc.tecmundo.ui.theme.TecMundoTheme
 
 class MainActivity : ComponentActivity() {
@@ -71,10 +71,15 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
 
-        Checkbox(
-            checked = terminos,
-            onCheckedChange = { terminos = it }
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = terminos,
+                onCheckedChange = { terminos = it }
+            )
+            Text("Acepto los términos y condiciones")
+        }
 
         OutlinedTextField(
             value = nombre,
@@ -82,13 +87,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
             label = { Text("Ingresa nombre") },
             isError = !verificarName(nombre),
             supportingText = {
-                if(verificarName(nombre)){
+                if (!verificarName(nombre)) {
                     Text("Debes ingresar un nombre", color = Red)
                 }
             }
         )
 
-        Button(onClick = { abrirModal() }) {
+        Button(
+            onClick = { abrirModal() },
+            enabled =  terminos && verificarName(nombre)
+        ) {
             Text(text = "Enviar")
         }
     }
