@@ -13,7 +13,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,10 +44,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
     var nombre by remember { mutableStateOf("") }
     var modal by remember { mutableStateOf(false) }
     var terminos by remember { mutableStateOf(false) }
-    var juegoSeleccionado by remember { mutableStateOf(0) }
 
-    val juegos = listOf("God of War", "FIFA", "Kenshi", "Minecraft")
-
+    // El nombre debe tener al menos 3 letras y solo letras o espacios
     fun verificarName(nombre: String): Boolean {
         return nombre.trim().length >= 3 && nombre.all { it.isLetter() || it.isWhitespace() }
     }
@@ -61,19 +58,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        juegos.forEachIndexed { index, opcion ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                RadioButton(
-                    selected = juegoSeleccionado == index,
-                    onClick = { juegoSeleccionado = index }
-                )
-                Text(opcion)
-            }
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        // Check de términos y condiciones
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = terminos,
                 onCheckedChange = { terminos = it }
@@ -81,6 +67,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             Text("Acepto los términos y condiciones")
         }
 
+        // Campo del nombre con mensaje de error
         OutlinedTextField(
             value = nombre,
             onValueChange = { nombre = it },
@@ -93,14 +80,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         )
 
+        // El botón se activa con el nombre válido y los términos aceptados
         Button(
             onClick = { abrirModal() },
-            enabled =  terminos && verificarName(nombre)
+            enabled = terminos && verificarName(nombre)
         ) {
             Text(text = "Enviar")
         }
     }
 
+    // Diálogo de confirmación
     if (modal) {
         AlertDialog(
             onDismissRequest = { cerrarModal() },

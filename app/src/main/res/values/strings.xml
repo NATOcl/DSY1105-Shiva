@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">TecMundo</string>
+    <string name="terrana_name">Shiva</string>
+
+    <!-- Textos de la bienvenida -->
+    <string name="welcome_tagline">LOREM IPSUM DOLOR SIT AMET.</string>
+    <string name="welcome_title">Tu parcela,\nbajo la mirada.</string>
+    <string name="welcome_subtitle">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</string>
+    <string name="welcome_start">Comenzar ahora</string>
+    <string name="welcome_footer">Shiva. Todo lo veo.</string>
+
+    <!-- Textos del registro -->
+    <string name="register_step">PASO 1 DE 2</string>
+    <string name="register_title">Crea tu cuenta</string>
+    <string name="register_subtitle">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</string>
+    <string name="label_full_name">NOMBRE COMPLETO</string>
+    <string name="hint_full_name">Ej. Elza Pito</string>
+    <string name="label_email">CORREO ELECTRÓNICO</string>
+    <string name="hint_email">nombre@correo.com</string>
+    <string name="label_farm">NOMBRE DE TU PARCELA</string>
+    <string name="hint_farm">Ej. Parcela El Plomo</string>
+    <string name="label_password">CONTRASEÑA</string>
+    <string name="hint_password">Mínimo 8 caracteres</string>
+
+    <!-- Términos: aquí cambias el texto cuando lo definan -->
+    <string name="terms_prefix">Acepto los </string>
+    <string name="terms_link">términos y condiciones</string>
+    <string name="terms_suffix"> y la política de privacidad.</string>
+    <string name="register_button">Crear mi cuenta</string>
+    <string name="register_have_account">¿Ya tienes una cuenta? </string>
+    <string name="register_login">\nInicia sesión</string>
 </resources>
