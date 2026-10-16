@@ -11,18 +11,35 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TecMundo">
+
+        <!-- Pantalla de inicio de la app -->
         <activity
-            android:name=".MainActivity"
+            android:name=".controller.WelcomeActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.TecMundo"
-            android:windowSoftInputMode="adjustResize">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.TecMundo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Pantalla de registro -->
+        <activity
+            android:name=".controller.RegisterActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.TecMundo"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Tu MainActivity de antes, ya no es la pantalla de inicio -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.TecMundo"
+            android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>
