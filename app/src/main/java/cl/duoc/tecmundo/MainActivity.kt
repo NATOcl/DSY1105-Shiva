@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import cl.duoc.tecmundo.ui.theme.TecMundoTheme
-import cl.duoc.tecmundo.view.ShivaApp
+import cl.duoc.tecmundo.ui.ShivaApp
 
 // unica activity de la app, todo lo demas son pantallas compose
 class MainActivity : ComponentActivity() {
