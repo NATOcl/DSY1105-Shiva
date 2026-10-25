@@ -25,6 +25,14 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE email = :email COLLATE NOCASE LIMIT 1")
     suspend fun findByEmail(email: String): UserEntity?
 
+    // true si ya hay una cuenta con ese correo (sin importar mayusculas)
+    @Query("SELECT EXISTS(SELECT 1 FROM users WHERE email = :email COLLATE NOCASE)")
+    suspend fun emailExists(email: String): Boolean
+
+    // true si ya hay una cuenta con ese rut (se guarda siempre con puntos y guion)
+    @Query("SELECT EXISTS(SELECT 1 FROM users WHERE rut = :rut)")
+    suspend fun rutExists(rut: String): Boolean
+
     // abre la sesion de ese usuario y deja cerradas las demas (en una sola instruccion)
     @Query("UPDATE users SET sessionActive = (id = :id)")
     suspend fun openSession(id: Long)

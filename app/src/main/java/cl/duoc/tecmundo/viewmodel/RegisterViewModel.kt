@@ -29,13 +29,18 @@ data class RegisterUiState(
     val passwordVisible: Boolean = false,
     val termsAccepted: Boolean = false,
     val touched: Set<Field> = emptySet(),
-    val accountAlreadyExists: Boolean = false,
+    val emailTaken: Boolean = false,
+    val rutTaken: Boolean = false,
     val registrationDone: Boolean = false
 ) {
     // los errores solo salen cuando el campo ya fue tocado o se intento enviar
     val nameError get() = if (Field.NAME in touched) Validators.nameError(fullName) else null
-    val rutError get() = if (Field.RUT in touched) Validators.rutError(rut) else null
-    val emailError get() = if (Field.EMAIL in touched) Validators.emailError(email) else null
+    val rutError get() = if (Field.RUT in touched) {
+        Validators.rutError(rut) ?: if (rutTaken) "Este RUT ya está registrado" else null
+    } else null
+    val emailError get() = if (Field.EMAIL in touched) {
+        Validators.emailError(email) ?: if (emailTaken) "Este correo ya está registrado" else null
+    } else null
     val phoneError get() = if (Field.PHONE in touched) Validators.phoneError(phone) else null
     val farmError get() = if (Field.FARM in touched) Validators.farmError(farmName) else null
     val passwordError get() = if (Field.PASSWORD in touched) Validators.passwordError(password) else null
@@ -50,7 +55,7 @@ data class RegisterUiState(
                 Validators.passwordError(password) == null
 
     // el checkbox de terminos es lo que habilita el boton de registro
-    val submitEnabled: Boolean get() = termsAccepted && !accountAlreadyExists
+    val submitEnabled: Boolean get() = termsAccepted
 }
 
 // maneja la logica del formulario: recibe lo escrito, valida y guarda
@@ -64,15 +69,6 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
     // version de solo lectura que observa la pantalla
     val state: StateFlow<RegisterUiState> = _state.asStateFlow()
 
-    // Room avisa si ya hay una cuenta guardada y cada vez que eso cambia
-    init {
-        viewModelScope.launch {
-            repo.isRegistered.collect { exists ->
-                _state.update { it.copy(accountAlreadyExists = exists) }
-            }
-        }
-    }
-
     // cambios de cada campo: aca se limpia lo que escribe la persona
     fun onProfileChange(profile: ProfileType) = _state.update { it.copy(profile = profile) }
 
@@ -81,11 +77,16 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
         it.copy(fullName = input.filter { char -> char.isLetter() || char == ' ' }.take(60))
     }
 
-    // rut: se formatea solo con puntos y guion
-    fun onRutChange(input: String) = _state.update { it.copy(rut = Validators.formatRut(input)) }
+    // rut: mientras escribe solo quedan numeros y K (sin puntos ni guion, asi el teclado no cambia);
+    // el formato con puntos y guion se pone al salir del campo
+    fun onRutChange(input: String) = _state.update {
+        it.copy(rut = Validators.cleanRut(input).take(9), rutTaken = false)
+    }
 
     // correo: sin espacios
-    fun onEmailChange(input: String) = _state.update { it.copy(email = input.replace(" ", "").take(80)) }
+    fun onEmailChange(input: String) = _state.update {
+        it.copy(email = input.replace(" ", "").take(80), emailTaken = false)
+    }
 
     // telefono: solo numeros, + y espacios
     fun onPhoneChange(input: String) = _state.update {
@@ -103,7 +104,11 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
     fun onTermsChange(isAccepted: Boolean) = _state.update { it.copy(termsAccepted = isAccepted) }
 
     // cuando sale de un campo lo marcamos como tocado para mostrar su error
-    fun onFieldBlur(field: Field) = _state.update { it.copy(touched = it.touched + field) }
+    // y si es el rut, aprovechamos de ordenarlo con puntos y guion
+    fun onFieldBlur(field: Field) = _state.update {
+        val rut = if (field == Field.RUT) Validators.formatRut(it.rut) else it.rut
+        it.copy(touched = it.touched + field, rut = rut)
+    }
 
     // al presionar crear mi cuenta: valida y, si todo esta bien, guarda
     fun onSubmit() {
@@ -115,13 +120,24 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
             _state.update { it.copy(touched = Field.entries.toSet()) }
             return
         }
-        // guardamos los datos sin espacios sobrantes (la clave se guarda cifrada)
         viewModelScope.launch {
+            // no se puede repetir el correo ni el rut de otra cuenta
+            val rut = Validators.formatRut(currentState.rut)
+            val emailTaken = repo.emailExists(currentState.email)
+            val rutTaken = repo.rutExists(rut)
+            if (emailTaken || rutTaken) {
+                _state.update {
+                    it.copy(emailTaken = emailTaken, rutTaken = rutTaken,
+                        touched = it.touched + Field.EMAIL + Field.RUT)
+                }
+                return@launch
+            }
+            // guardamos los datos sin espacios sobrantes (la clave se guarda cifrada)
             repo.saveAccount(
                 UserAccount(
                     profile = currentState.profile,
                     fullName = currentState.fullName.trim(),
-                    rut = currentState.rut,
+                    rut = rut,
                     email = currentState.email.trim(),
                     phone = currentState.phone.trim(),
                     farmName = currentState.farmName.trim()
@@ -134,5 +150,8 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     // se llama cuando la persona cierra el dialogo de exito
-    fun onRegistrationHandled() = _state.update { it.copy(registrationDone = false) }
+    // y se deja el formulario vacio por si quiere crear otra cuenta
+    fun onRegistrationHandled() {
+        _state.value = RegisterUiState()
+    }
 }

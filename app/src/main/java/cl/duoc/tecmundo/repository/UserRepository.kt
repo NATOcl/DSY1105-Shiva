@@ -20,6 +20,10 @@ class UserRepository(private val dao: UserDao) {
     // la cuenta con sesion abierta, o null; sigue ahi aunque se cierre la app
     val activeUser: Flow<UserAccount?> = dao.activeUser().map { it?.toAccount() }
 
+    // revisa si el correo o el rut ya estan registrados
+    suspend fun emailExists(email: String) = dao.emailExists(email.trim())
+    suspend fun rutExists(rut: String) = dao.rutExists(rut)
+
     // guarda la cuenta nueva (con la clave cifrada) y deja la sesion abierta
     suspend fun saveAccount(account: UserAccount, password: String) {
         val salt = PasswordHasher.newSalt()

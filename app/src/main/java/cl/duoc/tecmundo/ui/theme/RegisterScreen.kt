@@ -104,15 +104,6 @@ fun RegisterScreen(
                 Text("Empecemos con tus datos para preparar tu espacio de trabajo.",
                     fontSize = 14.sp, color = Color(0xFF6B5B2E), lineHeight = 20.sp)
 
-                // aviso si ya hay una cuenta registrada en este telefono
-                if (uiState.accountAlreadyExists && !uiState.registrationDone) {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "Ya existe una cuenta registrada en este dispositivo.",
-                        color = ShivaColors.Error, fontSize = 13.sp, fontWeight = FontWeight.Medium
-                    )
-                }
-
                 Spacer(Modifier.height(24.dp))
                 // selector de perfil: productor o aplicador
                 FieldLabel("¿CUÁL ES TU PERFIL?")
