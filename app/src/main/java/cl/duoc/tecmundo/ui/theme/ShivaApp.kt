@@ -12,7 +12,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import cl.duoc.tecmundo.model.ProfileType
 
-// las tres pantallas que existen por el momento
+
+// las tres pantallas que existen por ahora
 private enum class AppScreen { WELCOME, REGISTER, LOGIN }
 
 // decide que pantalla mostrar (sin libreria de navegacion, con tres pantallas alcanza)
