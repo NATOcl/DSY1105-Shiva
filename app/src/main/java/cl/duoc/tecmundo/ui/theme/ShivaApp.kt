@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import cl.duoc.tecmundo.model.ProfileType
 
+
 // las tres pantallas que existen por ahora
 private enum class AppScreen { WELCOME, REGISTER, LOGIN }
 
