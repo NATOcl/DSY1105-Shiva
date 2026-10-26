@@ -38,11 +38,12 @@ private val sampleRequests = listOf(
 fun ApplicatorHomeScreen(
     userName: String,                                   // nombre que sale arriba a la derecha
     requests: List<ApplicationRequest> = sampleRequests, // solicitudes a mostrar
-    onRequestClick: (ApplicationRequest) -> Unit = {}   // que pasa al tocar una tarjeta
+    onRequestClick: (ApplicationRequest) -> Unit = {},   // que pasa al tocar una tarjeta
+    onLogOut: () -> Unit = {}                           // cierra la sesion al tocar el avatar
 ) {
     HomeBackground {
         // cabecera con avatar y nombre
-        HomeHeader(userName = userName, greeting = "BIENVENIDO")
+        HomeHeader(userName = userName, greeting = "BIENVENIDO", onAvatarClick = onLogOut)
 
         Spacer(Modifier.height(20.dp))
         // titulo de la pantalla y bajada

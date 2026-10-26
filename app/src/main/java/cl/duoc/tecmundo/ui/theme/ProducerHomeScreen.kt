@@ -30,11 +30,12 @@ import cl.duoc.tecmundo.ui.theme.TecMundoTheme
 fun ProducerHomeScreen(
     userName: String,                       // nombre que sale arriba a la derecha
     parcels: List<Parcel> = emptyList(),    // parcelas del productor, vacia si todavia no registra ninguna
-    onAddParcel: () -> Unit = {}            // que pasa al tocar "Anadir nueva parcela"
+    onAddParcel: () -> Unit = {},           // que pasa al tocar "Anadir nueva parcela"
+    onLogOut: () -> Unit = {}                 // cierra la session al tocar el avatar
 ) {
     HomeBackground {
         // cabecera con avatar y nombre
-        HomeHeader(userName = userName, greeting = "BIENVENIDA")
+        HomeHeader(userName = userName, greeting = "BIENVENIDA", onAvatarClick = onLogOut)
 
         Spacer(Modifier.height(20.dp))
         // etiqueta chica de arriba del titulo

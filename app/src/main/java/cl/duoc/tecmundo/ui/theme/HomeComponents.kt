@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.duoc.tecmundo.ui.theme.ShivaColors
+import androidx.compose.foundation.clickable
 
 // piezas que comparten las pantallas de inicio del productor y del aplicador
 // (asi no repetimos el mismo codigo en las dos)
@@ -49,12 +50,12 @@ fun HomeBackground(content: @Composable ColumnScope.() -> Unit) {
 
 // cabecera: avatar con inicial a la izquierda, saludo y nombre a la derecha
 @Composable
-fun HomeHeader(userName: String, greeting: String = "BIENVENIDA") {
+fun HomeHeader(userName: String, greeting: String = "BIENVENIDA", onAvatarClick: () -> Unit = {}) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         // avatar: circulo cafe con la primera letra del nombre
         Box {
             Box(
-                Modifier.size(40.dp).clip(CircleShape).background(ShivaColors.Brown),
+                Modifier.size(40.dp).clip(CircleShape).background(ShivaColors.Brown).clickable(onClick = onAvatarClick),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
