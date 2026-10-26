@@ -157,10 +157,12 @@ fun RegisterScreen(
                 val enabled = uiState.submitEnabled
                 Row(
                     Modifier.fillMaxWidth().height(56.dp)
-                        .shadow(if (enabled) 8.dp else 0.dp, RoundedCornerShape(18.dp))
+                        // la sombra solo va con el boton activo: dibujada junto a una
+                        // transparencia se ve mal (el borron blanco al marcar los terminos)
+                        .then(if (enabled) Modifier.shadow(8.dp, RoundedCornerShape(18.dp)) else Modifier)
                         .clip(RoundedCornerShape(18.dp))
-                        .background(ShivaColors.Brown)
-                        .alpha(if (enabled) 1f else 0.45f)
+                        // desactivado: el color se aclara, sin usar alpha sobre todo el boton
+                        .background(if (enabled) ShivaColors.Brown else ShivaColors.Brown.copy(alpha = 0.45f))
                         .clickable(enabled = enabled, onClick = viewModel::onSubmit)
                         .padding(start = 20.dp, end = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
