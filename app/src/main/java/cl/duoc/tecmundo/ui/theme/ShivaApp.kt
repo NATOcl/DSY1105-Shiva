@@ -16,6 +16,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.tecmundo.ui.theme.ApplicatorHomeScreen
 import cl.duoc.tecmundo.ui.theme.ProducerHomeScreen
 import cl.duoc.tecmundo.viewmodel.SessionViewModel
+import cl.duoc.tecmundo.ui.theme.NewParcelScreen
+import cl.duoc.tecmundo.viewmodel.ParcelListViewModel
 
 
 // las tres pantallas que existen por ahora
@@ -23,13 +25,22 @@ private enum class AppScreen { WELCOME, REGISTER, LOGIN }
 
 // decide que pantalla mostrar (sin libreria de navegacion, con tres pantallas alcanza)
 @Composable
-fun ShivaApp(session: SessionViewModel = viewModel()) {
+fun ShivaApp(
+    session: SessionViewModel = viewModel(),
+    parcelList: ParcelListViewModel = viewModel()
+) {
     var currentScreen by rememberSaveable { mutableStateOf(AppScreen.WELCOME) }
     // el perfil que se eligio en la bienvenida para iniciar sesion
+
     var loginProfile by rememberSaveable { mutableStateOf(ProfileType.PRODUCTOR) }
+
     // la cuenta con sesion abierta (null = nadie), room la recuerda aunque se cierre la app
     val activeUser by session.activeUser.collectAsStateWithLifecycle()
     val user = activeUser
+    // true cuando el productor tiene abierto el formulario de nueva parcela
+    var addingParcel by rememberSaveable { mutableStateOf(false) }
+    // las parcelas del productor con sesion abierta (se actualiza sola al guardar)
+    val parcels by parcelList.parcels.collectAsStateWithLifecycle()
 
 
     // la bienvenida es oscura (iconos claros); registro y login son claros (iconos oscuros)
@@ -42,10 +53,24 @@ fun ShivaApp(session: SessionViewModel = viewModel()) {
     if (user != null) {
         // hay sesion abierta: cada perfil ve su pantalla de inicio con su nombre
         when (user.profile) {
-            ProfileType.PRODUCTOR -> ProducerHomeScreen(
-                userName = user.fullName,
-                onLogOut = { session.logOut() }
-            )
+            ProfileType.PRODUCTOR -> {
+                if (addingParcel) {
+                    // el boton atras del telefono cierra el formulario sin guardar
+                    BackHandler { addingParcel = false }
+                    NewParcelScreen(
+                        ownerRut = user.rut,
+                        onBack = { addingParcel = false },
+                        onSaved = { addingParcel = false }
+                    )
+                } else {
+                    ProducerHomeScreen(
+                        userName = user.fullName,
+                        parcels = parcels,
+                        onAddParcel = { addingParcel = true },
+                        onLogOut = { session.logOut() }
+                    )
+                }
+            }
             ProfileType.APLICADOR -> ApplicatorHomeScreen(
                 userName = user.fullName,
                 onLogOut = { session.logOut() }

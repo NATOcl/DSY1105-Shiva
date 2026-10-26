@@ -47,7 +47,7 @@ fun ProducerHomeScreen(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("Mis parcelas", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold,
                 color = HomeColors.Title, letterSpacing = (-0.5).sp, modifier = Modifier.weight(1f))
-            CountPill("${parcels.size} activas")
+            CountPill(if (parcels.size == 1) "1 activa" else "${parcels.size} activas")
         }
         Spacer(Modifier.height(8.dp))
         Text("Revisa tus cultivos o publica una solicitud de aplicación.",
@@ -108,6 +108,11 @@ private fun ParcelCard(parcel: Parcel) {
         Text(parcel.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = HomeColors.Title)
         Spacer(Modifier.height(4.dp))
         Text("${parcel.crop} · ${parcel.hectares} ha", fontSize = 12.sp, color = HomeColors.Subtitle)
+        // la zona solo se muestra si la parcela la tiene
+        if (parcel.zone.isNotBlank()) {
+            Spacer(Modifier.height(2.dp))
+            Text(parcel.zone, fontSize = 12.sp, color = ShivaColors.BrownText)
+        }
     }
 }
 

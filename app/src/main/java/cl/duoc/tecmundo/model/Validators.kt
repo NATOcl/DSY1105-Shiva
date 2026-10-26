@@ -63,6 +63,48 @@ object Validators {
     fun passwordError(value: String): String? =
         if (value.length >= 8) null else "Mínimo 8 caracteres"
 
+    // nombre de la parcela: no puede quedar vacio (acepta numeros, ej: "Parcela 01")
+    fun parcelNameError(value: String): String? {
+        val trimmed = value.trim()
+        return when {
+            trimmed.isEmpty() -> "Ingresa el nombre de la parcela"
+            trimmed.length < 2 -> "El nombre es demasiado corto"
+            else -> null
+        }
+    }
+
+    // zona: texto referencial, sin ubicacion precisa
+    fun zoneError(value: String): String? {
+        val trimmed = value.trim()
+        return when {
+            trimmed.isEmpty() -> "Ingresa la zona de la parcela"
+            trimmed.length < 3 -> "La zona es demasiado corta"
+            else -> null
+        }
+    }
+
+    // cultivo: solo letras y espacios (ej: "Maíz", "Trigo candeal")
+    fun cropError(value: String): String? {
+        val trimmed = value.trim()
+        return when {
+            trimmed.isEmpty() -> "Ingresa el tipo de cultivo"
+            trimmed.length < 3 -> "El cultivo es demasiado corto"
+            !NAME_REGEX.matches(trimmed) -> "Usa solo letras, sin números ni símbolos"
+            else -> null
+        }
+    }
+
+    // superficie: numero entero de hectareas, mayor que 0
+    fun hectaresError(value: String): String? {
+        if (value.isBlank()) return "Ingresa la superficie en hectáreas"
+        val number = value.toIntOrNull() ?: return "Ingresa solo números"
+        return when {
+            number <= 0 -> "La superficie debe ser mayor que 0"
+            number > 10_000 -> "La superficie es demasiado grande"
+            else -> null
+        }
+    }
+
     // ayudas del rut: primero dejamos solo numeros y la K, sin puntos ni guion
     fun cleanRut(value: String): String =
         value.uppercase().filter { it.isDigit() || it == 'K' }
