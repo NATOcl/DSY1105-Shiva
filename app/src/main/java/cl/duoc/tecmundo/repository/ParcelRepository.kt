@@ -12,15 +12,19 @@ class ParcelRepository(private val dao: ParcelDao) {
     // las parcelas de un productor, listas para mostrar
     fun parcelsOf(ownerRut: String): Flow<List<Parcel>> =
         dao.parcelsOf(ownerRut).map { list ->
-            list.map { Parcel(it.id, it.name, it.crop, it.hectares, it.zone, it.photoPath) }
+            list.map { Parcel(it.id, it.name, it.crop, it.hectares, it.zone, it.photoPath, it.hasWater, it.obstacles) }
         }
 
     // guarda una parcela nueva
-    suspend fun save(ownerRut: String, name: String, crop: String, hectares: Int, zone: String, photoPath: String?) {
+    suspend fun save(
+        ownerRut: String, name: String, crop: String, hectares: Int, zone: String,
+        photoPath: String?, hasWater: Boolean, obstacles: String
+    ) {
         dao.insert(
             ParcelEntity(
                 ownerRut = ownerRut, name = name.trim(), crop = crop.trim(),
-                hectares = hectares, zone = zone.trim(), photoPath = photoPath
+                hectares = hectares, zone = zone.trim(), photoPath = photoPath,
+                hasWater = hasWater, obstacles = obstacles.trim()
             )
         )
     }

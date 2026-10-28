@@ -148,13 +148,20 @@ private fun ParcelCard(parcel: Parcel) {
                 }
 
                 Spacer(Modifier.height(16.dp))
-                // recuadros con los datos que ya tenemos
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InfoChip("CULTIVO", parcel.crop, Modifier.weight(1f))
-                    InfoChip("SUPERFICIE", "${parcel.hectares} ha", Modifier.weight(1f))
+                // recuadros con los datos de la parcela
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        InfoChip("CULTIVO", parcel.crop, Modifier.weight(1f))
+                        InfoChip("SUPERFICIE", "${parcel.hectares} ha", Modifier.weight(1f))
+                    }
+                    InfoChip("DISPONE DE AGUA", if (parcel.hasWater) "Sí" else "No", Modifier.fillMaxWidth())
+                    // los obstáculos solo se muestran si el productor los escribió
+                    if (parcel.obstacles.isNotBlank()) {
+                        InfoChip("OBSTÁCULOS", parcel.obstacles, Modifier.fillMaxWidth())
+                    }
                 }
-            }
-        }
+            }   // <-- ESTA LLAVE FALTABA (cierra la columna con los textos)
+        }       // cierra la caja con la foto de fondo
 
         // barra amarilla de abajo (todavia no hace nada, se conecta mas adelante)
         Box(

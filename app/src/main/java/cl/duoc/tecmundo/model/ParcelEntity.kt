@@ -12,5 +12,7 @@ data class ParcelEntity(
     val crop: String,
     val hectares: Int,
     val zone: String,
-    val photoPath: String? = null   // ruta de la foto del terreno
+    val photoPath: String? = null,   // ruta de la foto del terreno
+    val hasWater: Boolean = true,       // si el terreno dispone de agua
+    val obstacles: String = ""          // obstáculos del terreno (opcional)
 )
