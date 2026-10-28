@@ -34,17 +34,15 @@ import cl.duoc.tecmundo.model.ApplicationRequest
 import cl.duoc.tecmundo.ui.theme.ShivaColors
 import cl.duoc.tecmundo.ui.theme.TecMundoTheme
 
-// Datos de prueba para poder ver la pantalla mientras todavía no cargamos
-// las solicitudes reales desde el backend o la base de datos.
+// Estos datos nos sirven para probar la pantalla mientras conectamos las solicitudes reales.
 private val sampleRequests = listOf(
     ApplicationRequest(1, "Parcela El Alerece", 12, "PENDIENTE", "Granulado", 10, "Diurna"),
     ApplicationRequest(2, "Parcela Los Aromos", 20, "PENDIENTE", "Líquido", 14, "Nocturna"),
     ApplicationRequest(3, "Campo Vista Sur", 27, "PENDIENTE", "Líquido", 8, "Diurna")
 )
 
-// Esta es la pantalla principal del aplicador.
-// Recibe el nombre del usuario, las solicitudes que debe mostrar y las acciones
-// que la aplicación debe ejecutar al abrir una parcela o cerrar la sesión.
+// Esta es la pantalla que ve el aplicador al entrar.
+// Recibe su nombre, las solicitudes y las acciones que se ejecutan al tocar una parcela o cerrar sesion.
 @Composable
 fun ApplicatorHomeScreen(
     userName: String,
@@ -52,18 +50,17 @@ fun ApplicatorHomeScreen(
     onRequestClick: (ApplicationRequest) -> Unit = {},
     onLogOut: () -> Unit = {}
 ) {
-    // Guarda la parcela seleccionada. Si vale null, no hay detalle abierto.
+    // Aqui guardamos la parcela que eligio el usuario. Si queda en null, no hay ninguna abierta.
     var selectedRequest by remember {
         mutableStateOf<ApplicationRequest?>(null)
     }
 
-    // Controla si se muestra el mensaje verde de confirmación.
-    // Al principio está en false, por lo que el mensaje no aparece.
+    // Esta variable decide si mostramos el aviso verde. Parte en false, asi que al entrar no se ve.
     var sentMessage by remember {
         mutableStateOf(false)
     }
 
-    // Cuando el mensaje verde aparece, esperamos 3 segundos y lo ocultamos.
+    // Cuando aparece el aviso verde, esperamos 3 segundos y despues lo escondemos.
     LaunchedEffect(sentMessage) {
         if (sentMessage) {
             delay(3000)
@@ -71,10 +68,9 @@ fun ApplicatorHomeScreen(
         }
     }
 
-    // HomeBackground aplica el fondo y el estilo general de la aplicación.
+    // Este componente pone el fondo y mantiene el estilo visual de la app.
     HomeBackground {
-        // La cabecera muestra el avatar y el nombre del usuario.
-        // Al tocar el avatar, se ejecuta onLogOut.
+        // Arriba se muestra el nombre y el avatar. Al tocarlo, se llama a la accion para cerrar sesion.
         HomeHeader(
             userName = userName,
             greeting = "BIENVENIDA",
@@ -83,7 +79,7 @@ fun ApplicatorHomeScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        // Título y texto que explican qué puede hacer el aplicador.
+        // Este titulo y el texto de abajo explican que puede hacer el aplicador.
         Text(
             "OPORTUNIDADES CERCANAS",
             fontSize = 13.sp,
@@ -103,7 +99,7 @@ fun ApplicatorHomeScreen(
 
         Spacer(Modifier.height(12.dp))
 
-        // El contador se calcula con la cantidad de solicitudes recibidas.
+        // Aqui mostramos cuantas solicitudes hay disponibles.
         Box(
             Modifier.fillMaxWidth(),
             contentAlignment = Alignment.CenterEnd
@@ -113,21 +109,21 @@ fun ApplicatorHomeScreen(
 
         Spacer(Modifier.height(12.dp))
 
-        // LazyColumn dibuja las parcelas en una lista desplazable.
-        // Cada tarjeta usa el ID como clave para identificarla.
+        // LazyColumn muestra las parcelas en una lista que se puede deslizar.
+        // Usamos el ID para que Compose reconozca cada tarjeta.
         LazyColumn(
             modifier = Modifier.weight(1f, fill = false),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             items(requests, key = { it.id }) { request ->
                 RequestCard(request) {
-                    // Guardamos la parcela seleccionada para abrir su detalle.
+                    // Guardamos la parcela que se toco para mostrar su informacion.
                     selectedRequest = request
 
-                    // Si había un mensaje de confirmación, lo ocultamos.
+                    // Si quedo un aviso anterior en pantalla, lo ocultamos.
                     sentMessage = false
 
-                    // Avisamos a la pantalla que contiene esta vista.
+                    // Tambien avisamos a la pantalla principal que se eligio esta solicitud.
                     onRequestClick(request)
                 }
             }
@@ -135,7 +131,7 @@ fun ApplicatorHomeScreen(
 
         Spacer(Modifier.height(12.dp))
 
-        // Este bloque solo se dibuja cuando sentMessage es true.
+        // El aviso verde aparece solamente cuando sentMessage vale true.
         if (sentMessage) {
             Row(
                 Modifier
@@ -178,8 +174,8 @@ fun ApplicatorHomeScreen(
         }
     }
 
-    // Si hay una parcela seleccionada, abrimos el diálogo con sus datos.
-    // Cuando selectedRequest vuelve a null, el diálogo desaparece.
+    // Si se eligio una parcela, abrimos la ventana con sus datos.
+    // Al volver selectedRequest a null, la ventana se cierra.
     selectedRequest?.let { request ->
         OfferDetailsDialog(
             request = request,
@@ -188,8 +184,7 @@ fun ApplicatorHomeScreen(
                 selectedRequest = null
             },
             onSend = {
-                // Se ejecuta al pulsar "Enviar oferta".
-                // Cerramos el detalle y activamos el mensaje verde.
+                // Esto pasa al tocar "Enviar oferta": cerramos la ventana y mostramos el aviso verde.
                 selectedRequest = null
                 sentMessage = true
             }
@@ -197,7 +192,7 @@ fun ApplicatorHomeScreen(
     }
 }
 
-// Dibuja una tarjeta resumida por cada solicitud de parcela.
+// Esta funcion arma la tarjeta resumida de cada parcela.
 @Composable
 private fun RequestCard(
     request: ApplicationRequest,
@@ -211,7 +206,7 @@ private fun RequestCard(
             .background(Color.White)
             .clickable(onClick = onClick)
     ) {
-        // Usa la foto asignada a la solicitud o la imagen de trigo por defecto.
+        // Si la solicitud tiene foto, la usamos; si no, mostramos la imagen de trigo.
         Image(
             painter = painterResource(request.imageRes ?: R.drawable.bg_wheat),
             contentDescription = request.farmName,
@@ -228,7 +223,7 @@ private fun RequestCard(
         ) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f)) {
-                    // Muestra la distancia y el estado de la solicitud.
+                    // Aqui se ve a cuantos kilometros esta la parcela y en que estado va la solicitud.
                     Text(
                         "A ${request.distanceKm} KM · ${request.status}",
                         fontSize = 9.sp,
@@ -239,7 +234,7 @@ private fun RequestCard(
 
                     Spacer(Modifier.height(5.dp))
 
-                    // Nombre de la parcela publicado por el productor.
+                    // Mostramos el nombre de la parcela que publico el productor.
                     Text(
                         request.farmName,
                         fontSize = 15.sp,
@@ -248,7 +243,7 @@ private fun RequestCard(
                     )
                 }
 
-                // Flecha decorativa que indica que se puede abrir el detalle.
+                // La flecha da una pista de que se puede tocar la tarjeta para ver mas detalles.
                 Box(
                     Modifier
                         .size(28.dp)
@@ -267,7 +262,7 @@ private fun RequestCard(
 
             Spacer(Modifier.height(8.dp))
 
-            // Por ahora el cultivo es un ejemplo fijo según el ID.
+            // Por ahora mostramos un cultivo de ejemplo segun el ID de la solicitud.
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -289,10 +284,10 @@ private fun RequestCard(
                 )
             }
 
-            // Deja el espacio sobrante entre la descripción y los datos de abajo.
+            // Este espacio ayuda a mantener los datos de abajo alineados.
             Spacer(Modifier.weight(1f))
 
-            // Resumen de los datos principales de la solicitud.
+            // Aqui dejamos a la vista los datos principales de la solicitud.
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -305,7 +300,7 @@ private fun RequestCard(
     }
 }
 
-// Componente reutilizable que muestra una etiqueta y su valor.
+// Esta funcion nos evita repetir el mismo formato para cada dato.
 @Composable
 private fun Detail(
     label: String,
@@ -331,15 +326,14 @@ private fun Detail(
 }
 
 // Ventana que aparece al seleccionar una parcela.
-// Aquí el aplicador revisa la información y escribe cuánto cobra por hectárea.
+// Aqui el aplicador revisa la informacion y escribe cuanto cobra por hectarea.
 @Composable
 private fun OfferDetailsDialog(
     request: ApplicationRequest,
     onDismiss: () -> Unit,
     onSend: () -> Unit
 ) {
-    // El precio se guarda en el estado local mientras se escribe.
-    // Si se abre otra parcela, el campo se reinicia.
+    // Guardamos el precio mientras se escribe. Si se abre otra parcela, el campo parte vacio.
     var price by remember(request.id) {
         mutableStateOf("")
     }
@@ -349,7 +343,7 @@ private fun OfferDetailsDialog(
         containerColor = Color(0xFFFFFDF5),
         shape = RoundedCornerShape(24.dp),
         title = {
-            // Encabezado del detalle: distancia y nombre de la parcela.
+            // En esta parte mostramos la distancia y el nombre de la parcela elegida.
             Column {
                 Text(
                     "TRABAJO A ${request.distanceKm} KM",
@@ -369,7 +363,7 @@ private fun OfferDetailsDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Datos de quien publicó la solicitud. El nombre es genérico por ahora.
+                // Aqui aparece quien publico la solicitud; por ahora usamos un nombre generico.
                 Column(
                     Modifier
                         .fillMaxWidth()
@@ -391,7 +385,7 @@ private fun OfferDetailsDialog(
                     )
                 }
 
-                // Dos filas de recuadros con los datos de la parcela.
+                // Estos recuadros ordenan los datos de la parcela para que se lean facil.
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     InfoBox("Producto", request.product, Modifier.weight(1f))
                     InfoBox("Superficie", "${request.hectares} ha", Modifier.weight(1f))
@@ -402,7 +396,7 @@ private fun OfferDetailsDialog(
                     InfoBox("Tiene agua", "Sí", Modifier.weight(1f))
                 }
 
-                // Este dato es demostrativo; debería venir de la solicitud real.
+                // Este dato es solo de ejemplo; mas adelante deberia venir de la solicitud real.
                 Column(
                     Modifier
                         .fillMaxWidth()
@@ -432,7 +426,7 @@ private fun OfferDetailsDialog(
                     letterSpacing = 0.8.sp
                 )
 
-                // Campo de precio: solo permite dígitos y limita la cantidad a 9 caracteres.
+                // En este campo solo aceptamos numeros y dejamos escribir hasta 9 digitos.
                 OutlinedTextField(
                     value = price,
                     onValueChange = { input ->
@@ -447,7 +441,7 @@ private fun OfferDetailsDialog(
             }
         },
         confirmButton = {
-            // El botón se habilita solo si el campo contiene un número válido.
+            // El boton se activa cuando se escribe un precio valido.
             Button(
                 onClick = onSend,
                 enabled = price.isNotBlank() && price.toLongOrNull() != null,
@@ -466,7 +460,7 @@ private fun OfferDetailsDialog(
             }
         },
         dismissButton = {
-            // Este botón solo cierra el detalle; no envía nada.
+            // Este boton cierra la ventana sin enviar la oferta.
             TextButton(onClick = onDismiss) {
                 Text("Cerrar", color = HomeColors.Title)
             }
@@ -474,7 +468,7 @@ private fun OfferDetailsDialog(
     )
 }
 
-// Recuadro reutilizable para presentar un dato del detalle.
+// Este recuadro sirve para mostrar cada dato con el mismo estilo.
 @Composable
 private fun InfoBox(
     label: String,
@@ -503,7 +497,7 @@ private fun InfoBox(
     }
 }
 
-// Vista previa para revisar el diseño en Android Studio sin iniciar sesión.
+// Esta vista previa permite revisar el diseno sin tener que iniciar sesion.
 @Preview(showBackground = true)
 @Composable
 private fun ApplicatorHomePreview() {
