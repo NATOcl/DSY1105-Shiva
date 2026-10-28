@@ -112,6 +112,7 @@ fun ProfileDrawerHost(
     userName: String,
     role: String,                 // "Productor" o "Aplicador", sale debajo del nombre
     onLogOut: () -> Unit,
+    onProfile: (() -> Unit)? = null,   // si viene, el menu muestra "Mi perfil de prestador" (solo aplicador)
     content: @Composable (openDrawer: () -> Unit) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -153,6 +154,24 @@ fun ProfileDrawerHost(
                             Column {
                                 Text(userName, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = HomeColors.Title)
                                 Text(role, fontSize = 12.sp, color = HomeColors.Subtitle)
+                            }
+                        }
+                        // opcion de perfil de prestador, solo para el aplicador
+                        if (onProfile != null) {
+                            Spacer(Modifier.height(24.dp))
+                            Row(
+                                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        closeDrawer()
+                                        onProfile()
+                                    }
+                                    .padding(vertical = 12.dp, horizontal = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(Modifier.size(8.dp).background(ShivaColors.Yellow, CircleShape))
+                                Spacer(Modifier.width(14.dp))
+                                Text("Mi perfil de prestador", fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium, color = HomeColors.Title)
                             }
                         }
                         // empuja "Cerrar sesion" al final del menu

@@ -48,6 +48,8 @@ fun ApplicatorHomeScreen(
     userName: String,
     requests: List<ApplicationRequest> = sampleRequests,
     onRequestClick: (ApplicationRequest) -> Unit = {},
+    hasProfile: Boolean = true,          // false si todavia no completa su perfil de prestador
+    onEditProfile: () -> Unit = {},      // abre el formulario del perfil de prestador
     onLogOut: () -> Unit = {}
 ) {
     // Aqui guardamos la parcela que eligio el usuario. Si queda en null, no hay ninguna abierta.
@@ -69,7 +71,9 @@ fun ApplicatorHomeScreen(
     }
 
     // El avatar abre el menu lateral del perfil, donde esta el boton para cerrar sesion.
-    ProfileDrawerHost(userName = userName, role = "Aplicador", onLogOut = onLogOut) { openDrawer ->
+    ProfileDrawerHost(
+        userName = userName, role = "Aplicador", onLogOut = onLogOut, onProfile = onEditProfile
+    ) { openDrawer ->
         // Este componente pone el fondo y mantiene el estilo visual de la app.
         HomeBackground {
             // Arriba se muestra el nombre y el avatar. Al tocarlo, se abre el menu lateral.
@@ -80,6 +84,27 @@ fun ApplicatorHomeScreen(
             )
 
             Spacer(Modifier.height(20.dp))
+
+            // Aviso para completar el perfil de prestador: sin el, los productores no pueden encontrarlo.
+            if (!hasProfile) {
+                Row(
+                    Modifier.fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFFFF7DB))
+                        .clickable(onClick = onEditProfile)
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Completa tu perfil de prestador", fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold, color = HomeColors.Title)
+                        Text("Agrega tus servicios y cobertura para que te encuentren.",
+                            fontSize = 12.sp, color = ShivaColors.BrownText)
+                    }
+                    Text("›", fontSize = 24.sp, color = ShivaColors.BrownDark)
+                }
+                Spacer(Modifier.height(16.dp))
+            }
 
             // Este titulo y el texto de abajo explican que puede hacer el aplicador.
             Text(
