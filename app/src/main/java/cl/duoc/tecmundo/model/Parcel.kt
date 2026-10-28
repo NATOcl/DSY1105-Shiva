@@ -6,5 +6,6 @@ data class Parcel(
     val name: String,     // nombre del campo
     val crop: String,     // cultivo (maiz, trigo, etc)
     val hectares: Int,    // superficie en hectareas
-    val zone: String = "" // zona referencial (texto manual, sin ubicacion precisa)
+    val zone: String = "", // zona referencial (texto manual, sin ubicacion precisa)
+    val photoPath: String? = null // ruta de la foto del terreno
 )

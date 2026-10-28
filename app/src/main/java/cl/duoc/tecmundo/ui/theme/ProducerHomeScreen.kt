@@ -24,6 +24,11 @@ import androidx.compose.ui.unit.sp
 import cl.duoc.tecmundo.model.Parcel
 import cl.duoc.tecmundo.ui.theme.ShivaColors
 import cl.duoc.tecmundo.ui.theme.TecMundoTheme
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 
 // pantalla de inicio del PRODUCTOR: lista de sus parcelas y boton para anadir una
 @Composable
@@ -105,9 +110,26 @@ private fun ParcelCard(parcel: Parcel) {
     Column(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White).padding(16.dp)
     ) {
+        // foto del terreno, solo si la parcela tiene una
+        parcel.photoPath?.let { ruta ->
+            val imagen = remember(ruta) {
+                BitmapFactory.decodeFile(ruta, BitmapFactory.Options().apply { inSampleSize = 4 })
+                    ?.asImageBitmap()
+            }
+            if (imagen != null) {
+                Image(
+                    imagen, "Foto de la parcela",
+                    Modifier.fillMaxWidth().height(140.dp).clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+                Spacer(Modifier.height(10.dp))
+            }
+            }
+
         Text(parcel.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = HomeColors.Title)
         Spacer(Modifier.height(4.dp))
         Text("${parcel.crop} · ${parcel.hectares} ha", fontSize = 12.sp, color = HomeColors.Subtitle)
+
         // la zona solo se muestra si la parcela la tiene
         if (parcel.zone.isNotBlank()) {
             Spacer(Modifier.height(2.dp))
