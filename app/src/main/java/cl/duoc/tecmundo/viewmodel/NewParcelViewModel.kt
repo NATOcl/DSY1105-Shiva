@@ -20,6 +20,7 @@ data class NewParcelUiState(
     val crop: String = "",
     val hectares: String = "",
     val zone: String = "",
+    val photoPath: String? = null,
     val touched: Set<ParcelField> = emptySet()
 ) {
     // los errores solo salen cuando el campo ya fue tocado
@@ -48,6 +49,8 @@ class NewParcelViewModel(app: Application) : AndroidViewModel(app) {
     fun onHectaresChange(v: String) = _state.update { it.copy(hectares = v.filter(Char::isDigit).take(5)) }
     fun onZoneChange(v: String) = _state.update { it.copy(zone = v) }
 
+    fun onPhotoChange(path: String?) = _state.update { it.copy(photoPath = path) }
+
     fun onFieldBlur(field: ParcelField) = _state.update { it.copy(touched = it.touched + field) }
 
     // valida todo; si esta bien guarda la parcela y avisa a la pantalla
@@ -56,7 +59,7 @@ class NewParcelViewModel(app: Application) : AndroidViewModel(app) {
         val s = _state.value
         if (!s.isValid) return
         viewModelScope.launch {
-            repo.save(ownerRut, s.name, s.crop, s.hectares.toInt(), s.zone)
+            repo.save(ownerRut, s.name, s.crop, s.hectares.toInt(), s.zone, s.photoPath)
             onSaved()
         }
     }

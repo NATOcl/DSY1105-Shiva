@@ -28,6 +28,19 @@ import cl.duoc.tecmundo.R
 import cl.duoc.tecmundo.ui.ShivaTextField
 import cl.duoc.tecmundo.viewmodel.NewParcelViewModel
 import cl.duoc.tecmundo.viewmodel.ParcelField
+import android.Manifest
+import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import java.io.File
 
 // formulario para registrar una parcela nueva
 @Composable
@@ -38,6 +51,37 @@ fun NewParcelScreen(
     viewModel: NewParcelViewModel = viewModel()
 ) {
     val ui by viewModel.state.collectAsStateWithLifecycle()
+
+    // ---------- CÁMARA ----------
+    val context = LocalContext.current
+    var archivoPendiente by remember { mutableStateOf<File?>(null) }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        val file = archivoPendiente
+        if (success && file != null) viewModel.onPhotoChange(file.absolutePath)
+    }
+
+    val abrirCamara = {
+        val carpeta = File(context.filesDir, "parcelas").apply { mkdirs() }
+        val file = File.createTempFile("parcela_", ".jpg", carpeta)
+        archivoPendiente = file
+        val uri = FileProvider.getUriForFile(context, context.packageName + ".provider", file)
+        takePictureLauncher.launch(uri)
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> if (granted) abrirCamara() }
+
+    val foto = remember(ui.photoPath) {
+        ui.photoPath?.let {
+            BitmapFactory.decodeFile(it, BitmapFactory.Options().apply { inSampleSize = 4 })
+                ?.asImageBitmap()
+        }
+    }
+    // ---------- FIN CÁMARA ----------
 
     Box(
         Modifier.fillMaxSize().background(
@@ -62,6 +106,31 @@ fun NewParcelScreen(
                 Text("Registra los datos de tu campo para poder solicitar aplicaciones.",
                     fontSize = 14.sp, color = Color(0xFF6B5B2E), lineHeight = 20.sp)
                 Spacer(Modifier.height(24.dp))
+                // recuadro de la foto del terreno
+                Text("FOTO DEL TERRENO", fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                    color = ShivaColors.BrownText, letterSpacing = 1.sp)
+                Spacer(Modifier.height(8.dp))
+                Box(
+                    Modifier.fillMaxWidth().height(160.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFFFF7DB))
+                        .clickable { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (foto != null) {
+                        Image(foto, "Foto del terreno", Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop)
+                    } else {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.size(40.dp).clip(CircleShape).background(ShivaColors.Yellow),
+                                contentAlignment = Alignment.Center) { Text("📷") }
+                            Spacer(Modifier.height(8.dp))
+                            Text("Tomar una foto", fontWeight = FontWeight.Bold,
+                                color = ShivaColors.Brown)
+                        }
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
 
                 ShivaTextField("NOMBRE DE LA PARCELA", ui.name, "Ej. Parcela 01", ui.nameError,
                     viewModel::onNameChange, { viewModel.onFieldBlur(ParcelField.NAME) }, KeyboardType.Text)
