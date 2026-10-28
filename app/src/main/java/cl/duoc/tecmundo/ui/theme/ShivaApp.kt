@@ -18,6 +18,8 @@ import cl.duoc.tecmundo.ui.theme.ProducerHomeScreen
 import cl.duoc.tecmundo.viewmodel.SessionViewModel
 import cl.duoc.tecmundo.ui.theme.NewParcelScreen
 import cl.duoc.tecmundo.viewmodel.ParcelListViewModel
+import cl.duoc.tecmundo.viewmodel.ProviderProfileViewModel
+import cl.duoc.tecmundo.ui.theme.ProviderProfileScreen
 
 
 // las tres pantallas que existen por ahora
@@ -27,7 +29,8 @@ private enum class AppScreen { WELCOME, REGISTER, LOGIN }
 @Composable
 fun ShivaApp(
     session: SessionViewModel = viewModel(),
-    parcelList: ParcelListViewModel = viewModel()
+    parcelList: ParcelListViewModel = viewModel(),
+    providerProfile: ProviderProfileViewModel = viewModel()
 ) {
     var currentScreen by rememberSaveable { mutableStateOf(AppScreen.WELCOME) }
     // el perfil que se eligio en la bienvenida para iniciar sesion
@@ -39,6 +42,10 @@ fun ShivaApp(
     val user = activeUser
     // true cuando el productor tiene abierto el formulario de nueva parcela
     var addingParcel by rememberSaveable { mutableStateOf(false) }
+    // true cuando el aplicador tiene abierto el formulario de su perfil de prestador
+    var editingProfile by rememberSaveable { mutableStateOf(false) }
+    // el perfil de prestador guardado (null = todavia no lo completa)
+    val savedProfile by providerProfile.savedProfile.collectAsStateWithLifecycle()
     // las parcelas del productor con sesion abierta (se actualiza sola al guardar)
     val parcels by parcelList.parcels.collectAsStateWithLifecycle()
 
@@ -71,39 +78,53 @@ fun ShivaApp(
                     )
                 }
             }
-            ProfileType.APLICADOR -> ApplicatorHomeScreen(
-                userName = user.fullName,
-                onLogOut = { session.logOut() }
-            )
+            ProfileType.APLICADOR -> {
+                if (editingProfile) {
+                    // el boton atras del telefono cierra el formulario sin guardar
+                    BackHandler { editingProfile = false }
+                    ProviderProfileScreen(
+                        ownerRut = user.rut,
+                        onBack = { editingProfile = false },
+                        onSaved = { editingProfile = false }
+                    )
+                } else {
+                    ApplicatorHomeScreen(
+                        userName = user.fullName,
+                        hasProfile = savedProfile != null,
+                        onEditProfile = { editingProfile = true },
+                        onLogOut = { session.logOut() }
+                    )
+                }
+            }
         }
     } else {
 
-    when (currentScreen) {
-        AppScreen.WELCOME -> WelcomeScreen(
-            onCreateAccount = { currentScreen = AppScreen.REGISTER },
-            onLogin = { profile ->
-                loginProfile = profile
-                currentScreen = AppScreen.LOGIN
+        when (currentScreen) {
+            AppScreen.WELCOME -> WelcomeScreen(
+                onCreateAccount = { currentScreen = AppScreen.REGISTER },
+                onLogin = { profile ->
+                    loginProfile = profile
+                    currentScreen = AppScreen.LOGIN
+                }
+            )
+
+            AppScreen.REGISTER -> {
+                // el boton atras del telefono vuelve a la bienvenida
+                BackHandler { currentScreen = AppScreen.WELCOME }
+                RegisterScreen(
+                    onBack = { currentScreen = AppScreen.WELCOME },
+                    onRegistered = { currentScreen = AppScreen.WELCOME }
+                )
             }
-        )
 
-        AppScreen.REGISTER -> {
-            // el boton atras del telefono vuelve a la bienvenida
-            BackHandler { currentScreen = AppScreen.WELCOME }
-            RegisterScreen(
-                onBack = { currentScreen = AppScreen.WELCOME },
-                onRegistered = { currentScreen = AppScreen.WELCOME }
-            )
-        }
-
-        AppScreen.LOGIN -> {
-            BackHandler { currentScreen = AppScreen.WELCOME }
-            LoginScreen(
-                profile = loginProfile,
-                onBack = { currentScreen = AppScreen.WELCOME },
-                onLoggedIn = { currentScreen = AppScreen.WELCOME }
-            )
-        }
+            AppScreen.LOGIN -> {
+                BackHandler { currentScreen = AppScreen.WELCOME }
+                LoginScreen(
+                    profile = loginProfile,
+                    onBack = { currentScreen = AppScreen.WELCOME },
+                    onLoggedIn = { currentScreen = AppScreen.WELCOME }
+                )
+            }
         }
     }
 }

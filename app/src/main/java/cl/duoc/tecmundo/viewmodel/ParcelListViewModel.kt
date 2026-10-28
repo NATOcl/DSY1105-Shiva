@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import cl.duoc.tecmundo.model.AppDatabase
 import cl.duoc.tecmundo.model.Parcel
 import cl.duoc.tecmundo.repository.ParcelRepository
-import cl.duoc.tecmundo.repository.UserRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,19 +13,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-// la lista de parcelas del productor que tiene la sesion abierta
+// las parcelas del productor que tiene la sesion abierta
 class ParcelListViewModel(app: Application) : AndroidViewModel(app) {
 
     private val db = AppDatabase.get(app)
-    private val userRepo = UserRepository(db.userDao())
-    private val parcelRepo = ParcelRepository(db.parcelDao())
+    private val repo = ParcelRepository(db.parcelDao())
 
-    // cada vez que cambia la cuenta activa, cambia la lista (si nadie tiene sesion, queda vacia)
-    // y cada vez que se guarda una parcela nueva, la lista se actualiza sola
+    // si cambia la sesion, la lista cambia sola (sin sesion = lista vacia)
     @OptIn(ExperimentalCoroutinesApi::class)
-    val parcels: StateFlow<List<Parcel>> = userRepo.activeUser
+    val parcels: StateFlow<List<Parcel>> = db.userDao().activeUser()
         .flatMapLatest { user ->
-            if (user == null) flowOf(emptyList()) else parcelRepo.parcelsOf(user.rut)
+            if (user == null) flowOf(emptyList()) else repo.parcelsOf(user.rut)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }

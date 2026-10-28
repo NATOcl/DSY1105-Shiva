@@ -6,11 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // la base de datos del telefono (archivo "shiva.db")
-@Database(entities = [UserEntity::class, ParcelEntity::class], version = 5, exportSchema = false)
+@Database(entities = [UserEntity::class, ParcelEntity::class, ProviderProfileEntity::class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
     abstract fun parcelDao(): ParcelDao
+    abstract fun providerProfileDao(): ProviderProfileDao
 
     companion object {
         @Volatile

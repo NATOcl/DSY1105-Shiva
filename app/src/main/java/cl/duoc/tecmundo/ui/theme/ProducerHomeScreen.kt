@@ -36,33 +36,36 @@ fun ProducerHomeScreen(
     userName: String,                       // nombre que sale arriba a la derecha
     parcels: List<Parcel> = emptyList(),    // parcelas del productor, vacia si todavia no registra ninguna
     onAddParcel: () -> Unit = {},           // que pasa al tocar "Anadir nueva parcela"
-    onLogOut: () -> Unit = {}                 // cierra la session al tocar el avatar
+    onLogOut: () -> Unit = {}                 // se llama al tocar "Cerrar sesión" en el menu lateral
 ) {
-    HomeBackground {
-        // cabecera con avatar y nombre
-        HomeHeader(userName = userName, greeting = "BIENVENIDA", onAvatarClick = onLogOut)
+    // el avatar abre el menu lateral del perfil, donde esta el boton para cerrar sesion
+    ProfileDrawerHost(userName = userName, role = "Productor", onLogOut = onLogOut) { openDrawer ->
+        HomeBackground {
+            // cabecera con avatar y nombre
+            HomeHeader(userName = userName, greeting = "BIENVENIDA", onAvatarClick = openDrawer)
 
-        Spacer(Modifier.height(20.dp))
-        // etiqueta chica de arriba del titulo
-        Text("VISTA GENERAL", fontSize = 11.sp, fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp, color = HomeColors.Eyebrow)
-        Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(20.dp))
+            // etiqueta chica de arriba del titulo
+            Text("VISTA GENERAL", fontSize = 11.sp, fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp, color = HomeColors.Eyebrow)
+            Spacer(Modifier.height(6.dp))
 
-        // titulo y contador de parcelas activas (el contador sale del tamano de la lista)
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Mis parcelas", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold,
-                color = HomeColors.Title, letterSpacing = (-0.5).sp, modifier = Modifier.weight(1f))
-            CountPill(if (parcels.size == 1) "1 activa" else "${parcels.size} activas")
-        }
-        Spacer(Modifier.height(8.dp))
-        Text("Revisa tus cultivos o publica una solicitud de aplicación.",
-            fontSize = 14.sp, color = HomeColors.Subtitle, lineHeight = 20.sp)
+            // titulo y contador de parcelas activas (el contador sale del tamano de la lista)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Mis parcelas", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold,
+                    color = HomeColors.Title, letterSpacing = (-0.5).sp, modifier = Modifier.weight(1f))
+                CountPill(if (parcels.size == 1) "1 activa" else "${parcels.size} activas")
+            }
+            Spacer(Modifier.height(8.dp))
+            Text("Revisa tus cultivos o publica una solicitud de aplicación.",
+                fontSize = 14.sp, color = HomeColors.Subtitle, lineHeight = 20.sp)
 
-        Spacer(Modifier.height(20.dp))
-        // lista con scroll: primero las parcelas y al final el boton de anadir
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(parcels, key = { it.id }) { ParcelCard(it) }
-            item { AddParcelCard(onAddParcel) }
+            Spacer(Modifier.height(20.dp))
+            // lista con scroll: primero las parcelas y al final el boton de anadir
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(parcels, key = { it.id }) { ParcelCard(it) }
+                item { AddParcelCard(onAddParcel) }
+            }
         }
     }
 }

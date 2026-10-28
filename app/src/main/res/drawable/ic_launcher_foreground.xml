@@ -4,39 +4,25 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- el grupo agranda el ojo para que llene bien el area segura -->
+    <!-- la plantita del logo de Shiva, centrada y dentro del area segura -->
     <group
-        android:scaleX="1.2"
-        android:scaleY="1.2"
-        android:pivotX="54"
-        android:pivotY="54">
-        <!-- pestanas -->
+        android:pivotX="0"
+        android:pivotY="0"
+        android:scaleX="2.7"
+        android:scaleY="2.7"
+        android:translateX="22.3"
+        android:translateY="20.25">
+        <!-- tallo -->
         <path
-            android:pathData="M27.5,49.7L31,53.9 M36.4,45.1L38.8,49.4 M45.6,42.1L46.7,46.3 M55.6,41L55.6,45.6 M64.5,42.1L63.4,46.3 M73.2,45.1L71.1,49.4 M80.5,49.7L77,53.9"
-            android:strokeColor="#111111"
-            android:strokeWidth="2.7"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-        <!-- parpados -->
+            android:fillColor="#4A3A00"
+            android:pathData="M11,12h2v9h-2z" />
+        <!-- hoja izquierda -->
         <path
-            android:pathData="M33.4,59.5C40,53.5 47,50.9 54,50.9 M60.7,51.6C66,53 71,56 74.3,59.5 C68,65 61,66.8 54,66.8 C47,66.8 40,65 33.4,59.5"
-            android:strokeColor="#111111"
-            android:strokeWidth="2.7"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-        <!-- iris -->
+            android:fillColor="#4A3A00"
+            android:pathData="M12,14C8,14 5,11.5 4.5,8C8.5,8 12,10 12,14Z" />
+        <!-- hoja derecha -->
         <path
-            android:pathData="M46.7,58.2a7.3,7.3 0 1,0 14.6,0a7.3,7.3 0 1,0 -14.6,0"
-            android:strokeColor="#111111"
-            android:strokeWidth="2.7"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
-        <!-- espiral del iris -->
-        <path
-            android:pathData="M52.6,63.4C54,63.8 55.3,62.9 55.3,61.6C55.3,59.8 53,58.9 51.5,60.2C49.9,61.6 50.4,64.4 52.8,65.4"
-            android:strokeColor="#111111"
-            android:strokeWidth="2.7"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
+            android:fillColor="#4A3A00"
+            android:pathData="M12,11C12,7 14.5,4 19,4C19,8.5 16,11 12,11Z" />
     </group>
 </vector>

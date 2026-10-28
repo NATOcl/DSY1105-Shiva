@@ -13,7 +13,7 @@ interface ParcelDao {
     @Insert
     suspend fun insert(parcel: ParcelEntity): Long
 
-    // las parcelas de un productor; como es Flow, avisa solo cuando se agrega una
+    // las parcelas de un productor; como es Flow, la lista se actualiza sola al guardar
     @Query("SELECT * FROM parcels WHERE ownerRut = :ownerRut ORDER BY id DESC")
     fun parcelsOf(ownerRut: String): Flow<List<ParcelEntity>>
 }

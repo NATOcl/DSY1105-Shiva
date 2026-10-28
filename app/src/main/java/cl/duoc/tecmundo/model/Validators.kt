@@ -105,6 +105,50 @@ object Validators {
         }
     }
 
+    // ---- perfil del prestador ----
+
+    // las opciones de chips (servicios, productos, horarios) deben tener al menos una elegida
+    fun chipsError(selected: Set<String>, what: String): String? =
+        if (selected.isEmpty()) "Elige al menos $what" else null
+
+    // cultivos que atiende: texto libre separado por coma (ej: "Maíz, Trigo")
+    fun cropsListError(value: String): String? {
+        val trimmed = value.trim()
+        return when {
+            trimmed.isEmpty() -> "Ingresa al menos un cultivo"
+            trimmed.length < 3 -> "El texto es demasiado corto"
+            else -> null
+        }
+    }
+
+    // zonas de cobertura: texto referencial separado por coma
+    fun coverageError(value: String): String? {
+        val trimmed = value.trim()
+        return when {
+            trimmed.isEmpty() -> "Ingresa al menos una zona de cobertura"
+            trimmed.length < 3 -> "La zona es demasiado corta"
+            else -> null
+        }
+    }
+
+    // capacidad: hectareas por dia, entero mayor que 0
+    fun capacityError(value: String): String? {
+        if (value.isBlank()) return "Ingresa las hectáreas por día"
+        val number = value.toIntOrNull() ?: return "Ingresa solo números"
+        return when {
+            number <= 0 -> "La capacidad debe ser mayor que 0"
+            number > 1_000 -> "La capacidad es demasiado grande"
+            else -> null
+        }
+    }
+
+    // experiencia: años, de 0 a 60
+    fun experienceError(value: String): String? {
+        if (value.isBlank()) return "Ingresa tus años de experiencia"
+        val number = value.toIntOrNull() ?: return "Ingresa solo números"
+        return if (number in 0..60) null else "Ingresa un valor entre 0 y 60"
+    }
+
     // ayudas del rut: primero dejamos solo numeros y la K, sin puntos ni guion
     fun cleanRut(value: String): String =
         value.uppercase().filter { it.isDigit() || it == 'K' }
