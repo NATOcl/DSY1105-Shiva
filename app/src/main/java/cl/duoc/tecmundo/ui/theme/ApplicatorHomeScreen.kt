@@ -68,107 +68,110 @@ fun ApplicatorHomeScreen(
         }
     }
 
-    // Este componente pone el fondo y mantiene el estilo visual de la app.
-    HomeBackground {
-        // Arriba se muestra el nombre y el avatar. Al tocarlo, se llama a la accion para cerrar sesion.
-        HomeHeader(
-            userName = userName,
-            greeting = "BIENVENIDA",
-            onAvatarClick = onLogOut
-        )
+    // El avatar abre el menu lateral del perfil, donde esta el boton para cerrar sesion.
+    ProfileDrawerHost(userName = userName, role = "Aplicador", onLogOut = onLogOut) { openDrawer ->
+        // Este componente pone el fondo y mantiene el estilo visual de la app.
+        HomeBackground {
+            // Arriba se muestra el nombre y el avatar. Al tocarlo, se abre el menu lateral.
+            HomeHeader(
+                userName = userName,
+                greeting = "BIENVENIDA",
+                onAvatarClick = openDrawer
+            )
 
-        Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(20.dp))
 
-        // Este titulo y el texto de abajo explican que puede hacer el aplicador.
-        Text(
-            "OPORTUNIDADES CERCANAS",
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp,
-            color = HomeColors.Eyebrow
-        )
+            // Este titulo y el texto de abajo explican que puede hacer el aplicador.
+            Text(
+                "OPORTUNIDADES CERCANAS",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp,
+                color = HomeColors.Eyebrow
+            )
 
-        Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(8.dp))
 
-        Text(
-            "Revisa solicitudes cercanas y envía tu oferta al productor.",
-            fontSize = 15.sp,
-            color = HomeColors.Subtitle,
-            lineHeight = 22.sp
-        )
+            Text(
+                "Revisa solicitudes cercanas y envía tu oferta al productor.",
+                fontSize = 15.sp,
+                color = HomeColors.Subtitle,
+                lineHeight = 22.sp
+            )
 
-        Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
-        // Aqui mostramos cuantas solicitudes hay disponibles.
-        Box(
-            Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            CountPill("${requests.size} disponibles")
-        }
+            // Aqui mostramos cuantas solicitudes hay disponibles.
+            Box(
+                Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                CountPill("${requests.size} disponibles")
+            }
 
-        Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
-        // LazyColumn muestra las parcelas en una lista que se puede deslizar.
-        // Usamos el ID para que Compose reconozca cada tarjeta.
-        LazyColumn(
-            modifier = Modifier.weight(1f, fill = false),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            items(requests, key = { it.id }) { request ->
-                RequestCard(request) {
-                    // Guardamos la parcela que se toco para mostrar su informacion.
-                    selectedRequest = request
+            // LazyColumn muestra las parcelas en una lista que se puede deslizar.
+            // Usamos el ID para que Compose reconozca cada tarjeta.
+            LazyColumn(
+                modifier = Modifier.weight(1f, fill = false),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                items(requests, key = { it.id }) { request ->
+                    RequestCard(request) {
+                        // Guardamos la parcela que se toco para mostrar su informacion.
+                        selectedRequest = request
 
-                    // Si quedo un aviso anterior en pantalla, lo ocultamos.
-                    sentMessage = false
+                        // Si quedo un aviso anterior en pantalla, lo ocultamos.
+                        sentMessage = false
 
-                    // Tambien avisamos a la pantalla principal que se eligio esta solicitud.
-                    onRequestClick(request)
+                        // Tambien avisamos a la pantalla principal que se eligio esta solicitud.
+                        onRequestClick(request)
+                    }
                 }
             }
-        }
 
-        Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
-        // El aviso verde aparece solamente cuando sentMessage vale true.
-        if (sentMessage) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF104432))
-                    .padding(14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
+            // El aviso verde aparece solamente cuando sentMessage vale true.
+            if (sentMessage) {
+                Row(
                     Modifier
-                        .size(30.dp)
-                        .clip(CircleShape)
-                        .background(ShivaColors.Yellow),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF104432))
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "✓",
-                        color = ShivaColors.BrownDark,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    Box(
+                        Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(ShivaColors.Yellow),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "✓",
+                            color = ShivaColors.BrownDark,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                Spacer(Modifier.width(10.dp))
+                    Spacer(Modifier.width(10.dp))
 
-                Column {
-                    Text(
-                        "Datos guardados",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
-                    Text(
-                        "Tu oferta fue enviada al productor.",
-                        color = Color(0xFFC7D9D0),
-                        fontSize = 12.sp
-                    )
+                    Column {
+                        Text(
+                            "Datos guardados",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                        Text(
+                            "Tu oferta fue enviada al productor.",
+                            color = Color(0xFFC7D9D0),
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         }
