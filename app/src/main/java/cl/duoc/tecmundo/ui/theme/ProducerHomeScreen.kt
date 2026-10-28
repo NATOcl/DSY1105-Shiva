@@ -106,38 +106,78 @@ private fun AddParcelCard(onClick: () -> Unit) {
         }
     }
 }
-
-// tarjeta de una parcela ya registrada (nombre, cultivo y superficie)
+// tarjeta de una parcela: la foto es el fondo, con los datos encima
 @Composable
 private fun ParcelCard(parcel: Parcel) {
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Color.White).padding(16.dp)
-    ) {
-        // foto del terreno, solo si la parcela tiene una
-        parcel.photoPath?.let { ruta ->
-            val imagen = remember(ruta) {
-                BitmapFactory.decodeFile(ruta, BitmapFactory.Options().apply { inSampleSize = 4 })
-                    ?.asImageBitmap()
-            }
-            if (imagen != null) {
-                Image(
-                    imagen, "Foto de la parcela",
-                    Modifier.fillMaxWidth().height(140.dp).clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(Modifier.height(10.dp))
-            }
-            }
-
-        Text(parcel.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = HomeColors.Title)
-        Spacer(Modifier.height(4.dp))
-        Text("${parcel.crop} · ${parcel.hectares} ha", fontSize = 12.sp, color = HomeColors.Subtitle)
-
-        // la zona solo se muestra si la parcela la tiene
-        if (parcel.zone.isNotBlank()) {
-            Spacer(Modifier.height(2.dp))
-            Text(parcel.zone, fontSize = 12.sp, color = ShivaColors.BrownText)
+    // convierte la ruta de la foto en imagen (null si la parcela no tiene foto)
+    val imagen = remember(parcel.photoPath) {
+        parcel.photoPath?.let {
+            BitmapFactory.decodeFile(it, BitmapFactory.Options().apply { inSampleSize = 4 })
+                ?.asImageBitmap()
         }
+    }
+
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))) {
+
+        // parte de arriba: foto de fondo + capa oscura + textos
+        Box(Modifier.fillMaxWidth().background(Color(0xFF4A3A00))) {
+            if (imagen != null) {
+                Image(imagen, "Foto de la parcela", Modifier.matchParentSize(),
+                    contentScale = ContentScale.Crop)
+            }
+            // capa oscura para que se lean los textos
+            Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.45f)))
+
+            Column(Modifier.padding(16.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        // la zona solo se muestra si la parcela la tiene
+                        if (parcel.zone.isNotBlank()) {
+                            Text(parcel.zone.uppercase(), fontSize = 11.sp, fontWeight = FontWeight.Bold,
+                                color = ShivaColors.Yellow, letterSpacing = 1.sp)
+                            Spacer(Modifier.height(2.dp))
+                        }
+                        Text(parcel.name, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold,
+                            color = Color.White)
+                    }
+                    // boton circular con la flecha
+                    Box(
+                        Modifier.size(36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.25f)),
+                        contentAlignment = Alignment.Center
+                    ) { Text("›", fontSize = 22.sp, color = Color.White) }
+                }
+
+                Spacer(Modifier.height(16.dp))
+                // recuadros con los datos que ya tenemos
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    InfoChip("CULTIVO", parcel.crop, Modifier.weight(1f))
+                    InfoChip("SUPERFICIE", "${parcel.hectares} ha", Modifier.weight(1f))
+                }
+            }
+        }
+
+        // barra amarilla de abajo (todavia no hace nada, se conecta mas adelante)
+        Box(
+            Modifier.fillMaxWidth().background(ShivaColors.Yellow).padding(vertical = 14.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("+  Solicitar aplicación", fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                color = ShivaColors.BrownDark)
+        }
+    }
+}
+
+// recuadro semitransparente con un dato (etiqueta chica arriba, valor abajo)
+@Composable
+private fun InfoChip(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier.clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.18f))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(label, fontSize = 9.sp, fontWeight = FontWeight.Bold,
+            color = Color.White.copy(alpha = 0.7f), letterSpacing = 0.5.sp)
+        Text(value, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
     }
 }
 
