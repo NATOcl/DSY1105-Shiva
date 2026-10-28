@@ -11,5 +11,6 @@ data class ParcelEntity(
     val name: String,
     val crop: String,
     val hectares: Int,
-    val zone: String
+    val zone: String,
+    val photoPath: String? = null   // ruta de la foto del terreno
 )
