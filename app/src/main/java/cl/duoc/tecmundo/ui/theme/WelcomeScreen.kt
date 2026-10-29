@@ -227,7 +227,8 @@ private fun LoginProfileSheet(
                 "Revisa trabajos y envía ofertas") { closeThen { onSelect(ProfileType.APLICADOR) } }
             Spacer(Modifier.height(12.dp))
             ProfileOption(R.drawable.ic_logo, "Entrar como administrador",
-                "Revisa los datos de prueba (sin login)") { closeThen { onAdmin() } }
+                "Revisa los datos de aplicadores y productores") { closeThen { onAdmin() } }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
