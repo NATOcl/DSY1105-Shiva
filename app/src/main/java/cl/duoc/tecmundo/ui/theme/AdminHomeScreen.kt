@@ -25,7 +25,7 @@ import cl.duoc.tecmundo.model.SampleData
 
 
 private enum class AdminTab(val label: String) {
-    USUARIOS("Usuarios"), PRESTADORES("Prestadores"), SOLICITUDES("Solicitudes")
+    USUARIOS("Productor"), PRESTADORES("Aplicador"), SOLICITUDES("Solicitudes")
 }
 
 @Composable
