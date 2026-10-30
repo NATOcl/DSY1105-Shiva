@@ -59,6 +59,11 @@ class NewParcelViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onFieldBlur(field: ParcelField) = _state.update { it.copy(touched = it.touched + field) }
 
+    // deja el formulario vacío para la próxima vez que se abra
+    fun reset() {
+        _state.value = NewParcelUiState()
+    }
+
     // valida todo; si esta bien guarda la parcela y avisa a la pantalla
     fun onSubmit(ownerRut: String, onSaved: () -> Unit) {
         _state.update { it.copy(touched = ParcelField.entries.toSet()) }
@@ -66,6 +71,7 @@ class NewParcelViewModel(app: Application) : AndroidViewModel(app) {
         if (!s.isValid) return
         viewModelScope.launch {
             repo.save(ownerRut, s.name, s.crop, s.hectares.toInt(), s.zone, s.photoPath,  s.hasWater, s.obstacles)
+            reset()
             onSaved()
         }
     }
