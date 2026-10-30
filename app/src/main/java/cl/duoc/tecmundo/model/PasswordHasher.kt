@@ -5,7 +5,7 @@ import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
-// cifra la clave para no guardarla en texto plano (PBKDF2 con sal, funciona desde Android 7)
+// cifra la clave para no guardarla en texto plano
 object PasswordHasher {
 
     private const val ALGORITHM = "PBKDF2WithHmacSHA1"

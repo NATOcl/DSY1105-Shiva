@@ -23,10 +23,10 @@ import cl.duoc.tecmundo.viewmodel.ProviderProfileViewModel
 import cl.duoc.tecmundo.ui.theme.ProviderProfileScreen
 
 
-// las tres pantallas que existen por ahora
+
 private enum class AppScreen { WELCOME, REGISTER, LOGIN }
 
-// decide que pantalla mostrar (sin libreria de navegacion, con tres pantallas alcanza)
+// decide que pantalla mostrar
 @Composable
 fun ShivaApp(
     session: SessionViewModel = viewModel(),
@@ -38,7 +38,7 @@ fun ShivaApp(
 
     var loginProfile by rememberSaveable { mutableStateOf(ProfileType.PRODUCTOR) }
 
-    // true cuando se entro como administrador (no tiene cuenta ni login, no se guarda en Room)
+    // true cuando se entro como administrador )
     var adminMode by rememberSaveable { mutableStateOf(false) }
 
     // la cuenta con sesion abierta (null = nadie), room la recuerda aunque se cierre la app

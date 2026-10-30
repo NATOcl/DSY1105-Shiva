@@ -160,10 +160,10 @@ private fun ParcelCard(parcel: Parcel) {
                         InfoChip("OBSTÁCULOS", parcel.obstacles, Modifier.fillMaxWidth())
                     }
                 }
-            }   // <-- ESTA LLAVE FALTABA (cierra la columna con los textos)
-        }       // cierra la caja con la foto de fondo
+            }
+        }
 
-        // barra amarilla de abajo (todavia no hace nada, se conecta mas adelante)
+
         Box(
             Modifier.fillMaxWidth().background(ShivaColors.Yellow).padding(vertical = 14.dp),
             contentAlignment = Alignment.Center
@@ -174,7 +174,7 @@ private fun ParcelCard(parcel: Parcel) {
     }
 }
 
-// recuadro semitransparente con un dato (etiqueta chica arriba, valor abajo)
+// recuadro semitransparente con un dato
 @Composable
 private fun InfoChip(label: String, value: String, modifier: Modifier = Modifier) {
     Column(

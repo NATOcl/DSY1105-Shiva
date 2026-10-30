@@ -24,7 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
                 AppDatabase::class.java,
                 "shiva.db"
             )
-                // OJO: al cambiar la version se borra la base (solo para desarrollo)
+                // al cambiar la version se borra la base
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build().also { instance = it }
         }

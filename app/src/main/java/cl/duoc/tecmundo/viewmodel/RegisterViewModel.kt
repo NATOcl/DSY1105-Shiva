@@ -144,7 +144,7 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
                 ),
                 currentState.password
             )
-            // listo: avisamos que se registro para mostrar el dialogo de exito
+            // avisamos que se registro para mostrar el dialogo de exito
             _state.update { it.copy(registrationDone = true) }
         }
     }
