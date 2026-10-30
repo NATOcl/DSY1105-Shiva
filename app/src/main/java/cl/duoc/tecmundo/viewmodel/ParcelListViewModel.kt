@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 // las parcelas del productor que tiene la sesion abierta
 class ParcelListViewModel(app: Application) : AndroidViewModel(app) {
@@ -26,4 +27,10 @@ class ParcelListViewModel(app: Application) : AndroidViewModel(app) {
             if (user == null) flowOf(emptyList()) else repo.parcelsOf(user.rut)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    // elimina la parcela; launch la ejecuta en segundo plano
+    // la lista "parcels" se actualiza sola porque viene de un Flow de Room
+    fun deleteParcel(id: Long) {
+        viewModelScope.launch { repo.delete(id) }
+    }
 }

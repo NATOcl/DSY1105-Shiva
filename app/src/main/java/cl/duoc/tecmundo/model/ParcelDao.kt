@@ -16,4 +16,8 @@ interface ParcelDao {
     // las parcelas de un productor; como es Flow, la lista se actualiza sola al guardar
     @Query("SELECT * FROM parcels WHERE ownerRut = :ownerRut ORDER BY id DESC")
     fun parcelsOf(ownerRut: String): Flow<List<ParcelEntity>>
+
+    // borra la parcela con ese id (suspend: se ejecuta fuera del hilo principal)
+    @Query("DELETE FROM parcels WHERE id = :id")
+    suspend fun delete(id: Long)
 }
