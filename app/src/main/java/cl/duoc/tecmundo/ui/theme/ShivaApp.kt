@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import cl.duoc.tecmundo.ui.theme.ParcelDetailScreen
+import cl.duoc.tecmundo.ui.theme.NewRequestSheet
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
@@ -46,6 +49,13 @@ fun ShivaApp(
     val user = activeUser
     // true cuando el productor tiene abierto el formulario de nueva parcela
     var addingParcel by rememberSaveable { mutableStateOf(false) }
+    // id de la parcela que tiene abierta la pantalla de detalle (null = ninguna)
+    var selectedParcelId by rememberSaveable { mutableStateOf<Long?>(null) }
+    // id de la parcela a la que se le esta pidiendo una aplicacion (null = ventana cerrada)
+    var requestParcelId by rememberSaveable { mutableStateOf<Long?>(null) }
+    // ids de las parcelas que ya tienen una solicitud publicada
+    // (por ahora vive solo en memoria: se borra al cerrar la app, despues se guarda en Room)
+    var requestedIds by remember { mutableStateOf(setOf<Long>()) }
     // true cuando el aplicador tiene abierto el formulario de su perfil de prestador
     var editingProfile by rememberSaveable { mutableStateOf(false) }
     // el perfil de prestador guardado (null = todavia no lo completa)
@@ -68,6 +78,10 @@ fun ShivaApp(
         // hay sesion abierta: cada perfil ve su pantalla de inicio con su nombre
         when (user.profile) {
             ProfileType.PRODUCTOR -> {
+                // busca las parcelas que corresponden a los ids guardados (null si no hay ninguna abierta)
+                val selectedParcel = parcels.firstOrNull { it.id == selectedParcelId }
+                val requestParcel = parcels.firstOrNull { it.id == requestParcelId }
+
                 if (addingParcel) {
                     // el boton atras del telefono cierra el formulario sin guardar
                     BackHandler { addingParcel = false }
@@ -76,12 +90,38 @@ fun ShivaApp(
                         onBack = { addingParcel = false },
                         onSaved = { addingParcel = false }
                     )
+                } else if (selectedParcel != null) {
+                    // NUEVO: detalle de la parcela; el boton atras vuelve a "Mis parcelas"
+                    BackHandler { selectedParcelId = null }
+                    ParcelDetailScreen(
+                        parcel = selectedParcel,
+                        hasRequest = selectedParcel.id in requestedIds,
+                        onBack = { selectedParcelId = null },
+                        onDelete = {                                    // NUEVO
+                            parcelList.deleteParcel(selectedParcel.id)  // borra de la base de datos
+                            selectedParcelId = null                      // vuelve a "Mis parcelas"
+                        }
+                    )
                 } else {
                     ProducerHomeScreen(
                         userName = user.fullName,
                         parcels = parcels,
                         onAddParcel = { addingParcel = true },
+                        onParcelClick = { selectedParcelId = it.id },   // NUEVO: abre el detalle
+                        onRequestClick = { requestParcelId = it.id },   // NUEVO: abre "Nueva solicitud"
                         onLogOut = { session.logOut() }
+                    )
+                }
+
+                // NUEVO: la ventana "Nueva solicitud" va al final para que salga encima de cualquier pantalla
+                if (requestParcel != null) {
+                    NewRequestSheet(
+                        parcel = requestParcel,
+                        onDismiss = { requestParcelId = null },   // se cerro sin publicar
+                        onPublish = {
+                            requestedIds = requestedIds + requestParcel.id  // anota que esta parcela ya pidio
+                            requestParcelId = null                           // cierra la ventana
+                        }
                     )
                 }
             }

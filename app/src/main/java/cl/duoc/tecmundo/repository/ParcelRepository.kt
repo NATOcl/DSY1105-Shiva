@@ -28,4 +28,7 @@ class ParcelRepository(private val dao: ParcelDao) {
             )
         )
     }
+
+    // elimina una parcela por su id
+    suspend fun delete(id: Long) = dao.delete(id)
 }
