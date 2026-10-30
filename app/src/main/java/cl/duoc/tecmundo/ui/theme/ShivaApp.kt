@@ -13,6 +13,7 @@ import androidx.core.view.WindowCompat
 import cl.duoc.tecmundo.model.ProfileType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.tecmundo.ui.theme.AdminHomeScreen
 import cl.duoc.tecmundo.ui.theme.ApplicatorHomeScreen
 import cl.duoc.tecmundo.ui.theme.ProducerHomeScreen
 import cl.duoc.tecmundo.viewmodel.SessionViewModel
@@ -37,6 +38,9 @@ fun ShivaApp(
 
     var loginProfile by rememberSaveable { mutableStateOf(ProfileType.PRODUCTOR) }
 
+    // true cuando se entro como administrador (no tiene cuenta ni login, no se guarda en Room)
+    var adminMode by rememberSaveable { mutableStateOf(false) }
+
     // la cuenta con sesion abierta (null = nadie), room la recuerda aunque se cierre la app
     val activeUser by session.activeUser.collectAsStateWithLifecycle()
     val user = activeUser
@@ -55,9 +59,12 @@ fun ShivaApp(
     SideEffect {
         val window = (view.context as Activity).window
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
-            user != null || currentScreen != AppScreen.WELCOME
+            user != null || adminMode || currentScreen != AppScreen.WELCOME
     }
-    if (user != null) {
+    if (adminMode) {
+        // el administrador entra directo desde la bienvenida; salir lo devuelve a ella
+        AdminHomeScreen(onLogOut = { adminMode = false })
+    } else if (user != null) {
         // hay sesion abierta: cada perfil ve su pantalla de inicio con su nombre
         when (user.profile) {
             ProfileType.PRODUCTOR -> {
@@ -102,6 +109,7 @@ fun ShivaApp(
         when (currentScreen) {
             AppScreen.WELCOME -> WelcomeScreen(
                 onCreateAccount = { currentScreen = AppScreen.REGISTER },
+                onAdmin = { adminMode = true },
                 onLogin = { profile ->
                     loginProfile = profile
                     currentScreen = AppScreen.LOGIN
