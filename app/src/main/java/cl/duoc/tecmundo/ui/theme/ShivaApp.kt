@@ -23,48 +23,34 @@ import cl.duoc.tecmundo.viewmodel.SessionViewModel
 import cl.duoc.tecmundo.ui.theme.NewParcelScreen
 import cl.duoc.tecmundo.viewmodel.ParcelListViewModel
 import cl.duoc.tecmundo.viewmodel.ProviderProfileViewModel
+import cl.duoc.tecmundo.viewmodel.RequestListViewModel
 import cl.duoc.tecmundo.ui.theme.ProviderProfileScreen
-
-
 
 private enum class AppScreen { WELCOME, REGISTER, LOGIN }
 
-// decide que pantalla mostrar
 @Composable
 fun ShivaApp(
     session: SessionViewModel = viewModel(),
     parcelList: ParcelListViewModel = viewModel(),
-    providerProfile: ProviderProfileViewModel = viewModel()
+    providerProfile: ProviderProfileViewModel = viewModel(),
+    requestList: RequestListViewModel = viewModel()
 ) {
     var currentScreen by rememberSaveable { mutableStateOf(AppScreen.WELCOME) }
-    // el perfil que se eligio en la bienvenida para iniciar sesion
-
     var loginProfile by rememberSaveable { mutableStateOf(ProfileType.PRODUCTOR) }
-
-    // true cuando se entro como administrador )
     var adminMode by rememberSaveable { mutableStateOf(false) }
 
-    // la cuenta con sesion abierta (null = nadie), room la recuerda aunque se cierre la app
     val activeUser by session.activeUser.collectAsStateWithLifecycle()
     val user = activeUser
-    // true cuando el productor tiene abierto el formulario de nueva parcela
     var addingParcel by rememberSaveable { mutableStateOf(false) }
-    // id de la parcela que tiene abierta la pantalla de detalle (null = ninguna)
     var selectedParcelId by rememberSaveable { mutableStateOf<Long?>(null) }
-    // id de la parcela a la que se le esta pidiendo una aplicacion (null = ventana cerrada)
     var requestParcelId by rememberSaveable { mutableStateOf<Long?>(null) }
-    // ids de las parcelas que ya tienen una solicitud publicada
-    // (por ahora vive solo en memoria: se borra al cerrar la app, despues se guarda en Room)
     var requestedIds by remember { mutableStateOf(setOf<Long>()) }
-    // true cuando el aplicador tiene abierto el formulario de su perfil de prestador
     var editingProfile by rememberSaveable { mutableStateOf(false) }
-    // el perfil de prestador guardado (null = todavia no lo completa)
+
     val savedProfile by providerProfile.savedProfile.collectAsStateWithLifecycle()
-    // las parcelas del productor con sesion abierta (se actualiza sola al guardar)
     val parcels by parcelList.parcels.collectAsStateWithLifecycle()
+    val requests by requestList.requests.collectAsStateWithLifecycle()
 
-
-    // la bienvenida es oscura (iconos claros); registro y login son claros (iconos oscuros)
     val view = LocalView.current
     SideEffect {
         val window = (view.context as Activity).window
@@ -72,34 +58,32 @@ fun ShivaApp(
             user != null || adminMode || currentScreen != AppScreen.WELCOME
     }
     if (adminMode) {
-        // el administrador entra directo desde la bienvenida; salir lo devuelve a ella
         AdminHomeScreen(onLogOut = { adminMode = false })
     } else if (user != null) {
-        // hay sesion abierta: cada perfil ve su pantalla de inicio con su nombre
         when (user.profile) {
             ProfileType.PRODUCTOR -> {
-                // busca las parcelas que corresponden a los ids guardados (null si no hay ninguna abierta)
                 val selectedParcel = parcels.firstOrNull { it.id == selectedParcelId }
                 val requestParcel = parcels.firstOrNull { it.id == requestParcelId }
 
                 if (addingParcel) {
-                    // el boton atras del telefono cierra el formulario sin guardar
                     BackHandler { addingParcel = false }
                     NewParcelScreen(
                         ownerRut = user.rut,
                         onBack = { addingParcel = false },
-                        onSaved = { addingParcel = false }
+                        onSaved = {
+                            addingParcel = false
+                            parcelList.refresh()
+                        }
                     )
                 } else if (selectedParcel != null) {
-                    // NUEVO: detalle de la parcela; el boton atras vuelve a "Mis parcelas"
                     BackHandler { selectedParcelId = null }
                     ParcelDetailScreen(
                         parcel = selectedParcel,
                         hasRequest = selectedParcel.id in requestedIds,
                         onBack = { selectedParcelId = null },
-                        onDelete = {                                    // NUEVO
-                            parcelList.deleteParcel(selectedParcel.id)  // borra de la base de datos
-                            selectedParcelId = null                      // vuelve a "Mis parcelas"
+                        onDelete = {
+                            parcelList.deleteParcel(selectedParcel.id)
+                            selectedParcelId = null
                         }
                     )
                 } else {
@@ -107,27 +91,27 @@ fun ShivaApp(
                         userName = user.fullName,
                         parcels = parcels,
                         onAddParcel = { addingParcel = true },
-                        onParcelClick = { selectedParcelId = it.id },   // NUEVO: abre el detalle
-                        onRequestClick = { requestParcelId = it.id },   // NUEVO: abre "Nueva solicitud"
+                        onParcelClick = { selectedParcelId = it.id },
+                        onRequestClick = { requestParcelId = it.id },
                         onLogOut = { session.logOut() }
                     )
                 }
 
-                // NUEVO: la ventana "Nueva solicitud" va al final para que salga encima de cualquier pantalla
                 if (requestParcel != null) {
                     NewRequestSheet(
                         parcel = requestParcel,
-                        onDismiss = { requestParcelId = null },   // se cerro sin publicar
-                        onPublish = {
-                            requestedIds = requestedIds + requestParcel.id  // anota que esta parcela ya pidio
-                            requestParcelId = null                           // cierra la ventana
+                        onDismiss = { requestParcelId = null },
+                        onPublish = { nuevaSolicitud ->
+                            requestList.crearSolicitud(nuevaSolicitud) {
+                                requestedIds = requestedIds + requestParcel.id
+                            }
+                            requestParcelId = null
                         }
                     )
                 }
             }
             ProfileType.APLICADOR -> {
                 if (editingProfile) {
-                    // el boton atras del telefono cierra el formulario sin guardar
                     BackHandler { editingProfile = false }
                     ProviderProfileScreen(
                         ownerRut = user.rut,
@@ -137,6 +121,7 @@ fun ShivaApp(
                 } else {
                     ApplicatorHomeScreen(
                         userName = user.fullName,
+                        requests = requests,
                         hasProfile = savedProfile != null,
                         onEditProfile = { editingProfile = true },
                         onLogOut = { session.logOut() }
@@ -145,7 +130,6 @@ fun ShivaApp(
             }
         }
     } else {
-
         when (currentScreen) {
             AppScreen.WELCOME -> WelcomeScreen(
                 onCreateAccount = { currentScreen = AppScreen.REGISTER },
@@ -157,7 +141,6 @@ fun ShivaApp(
             )
 
             AppScreen.REGISTER -> {
-                // el boton atras del telefono vuelve a la bienvenida
                 BackHandler { currentScreen = AppScreen.WELCOME }
                 RegisterScreen(
                     onBack = { currentScreen = AppScreen.WELCOME },

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,8 +32,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import cl.duoc.tecmundo.R
 import cl.duoc.tecmundo.model.ApplicationRequest
-import cl.duoc.tecmundo.ui.theme.ShivaColors
-import cl.duoc.tecmundo.ui.theme.TecMundoTheme
 
 // Estos datos nos sirven para probar la pantalla mientras conectamos las solicitudes reales.
 private val sampleRequests = listOf(
@@ -96,10 +95,17 @@ fun ApplicatorHomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("Completa tu perfil de prestador", fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold, color = HomeColors.Title)
-                        Text("Agrega tus servicios y cobertura para que te encuentren.",
-                            fontSize = 12.sp, color = ShivaColors.BrownText)
+                        Text(
+                            "Completa tu perfil de prestador",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = HomeColors.Title
+                        )
+                        Text(
+                            "Agrega tus servicios y cobertura para que te encuentren.",
+                            fontSize = 12.sp,
+                            color = ShivaColors.BrownText
+                        )
                     }
                     Text("›", fontSize = 24.sp, color = ShivaColors.BrownDark)
                 }
@@ -234,9 +240,21 @@ private fun RequestCard(
             .background(Color.White)
             .clickable(onClick = onClick)
     ) {
-        // Si la solicitud tiene foto, la usamos; si no, mostramos la imagen de trigo.
+        val context = LocalContext.current
+        val drawableId = remember(request.imagePath, request.imageRes) {
+            val byName = if (!request.imagePath.isNullOrBlank()) {
+                context.resources.getIdentifier(request.imagePath, "drawable", context.packageName)
+            } else 0
+            when {
+                byName != 0 -> byName
+                request.imageRes != null -> request.imageRes
+                else -> R.drawable.bg_wheat
+            }
+        }
+
+        // Resuelve la foto desde el texto guardado en Xano (ej: "bg_wheat") o usa una por defecto.
         Image(
-            painter = painterResource(request.imageRes ?: R.drawable.bg_wheat),
+            painter = painterResource(drawableId),
             contentDescription = request.farmName,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -290,7 +308,7 @@ private fun RequestCard(
 
             Spacer(Modifier.height(8.dp))
 
-            // Por ahora mostramos un cultivo de ejemplo segun el ID de la solicitud.
+            // Mostramos los comentarios o un cultivo de ejemplo si viene vacio.
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -305,10 +323,12 @@ private fun RequestCard(
                     letterSpacing = 0.5.sp
                 )
                 Text(
-                    "Tipo de cultivo: ${if (request.id == 2) "Arroz" else "Maíz amarillo"}",
+                    if (request.notes.isNotBlank()) request.notes
+                    else "Tipo de cultivo: ${if (request.id == 2) "Arroz" else "Maíz amarillo"}",
                     fontSize = 10.sp,
                     color = HomeColors.Title,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
                 )
             }
 
@@ -391,7 +411,7 @@ private fun OfferDetailsDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Aqui aparece quien publico la solicitud; por ahora usamos un nombre generico.
+                // Aqui aparece quien publico la solicitud.
                 Column(
                     Modifier
                         .fillMaxWidth()
@@ -421,10 +441,10 @@ private fun OfferDetailsDialog(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     InfoBox("Aplicación", request.schedule, Modifier.weight(1f))
-                    InfoBox("Tiene agua", "Sí", Modifier.weight(1f))
+                    InfoBox("Tiene agua", if (request.hasWater) "Sí" else "No", Modifier.weight(1f))
                 }
 
-                // Este dato es solo de ejemplo; mas adelante deberia venir de la solicitud real.
+                // Muestra los obstaculos o comentarios enviados desde Xano.
                 Column(
                     Modifier
                         .fillMaxWidth()
@@ -440,7 +460,7 @@ private fun OfferDetailsDialog(
                     )
                     Spacer(Modifier.height(3.dp))
                     Text(
-                        "Árboles nativos en deslinde norte",
+                        request.notes.ifBlank { "Sin obstáculos informados" },
                         fontSize = 11.sp,
                         color = HomeColors.Title
                     )

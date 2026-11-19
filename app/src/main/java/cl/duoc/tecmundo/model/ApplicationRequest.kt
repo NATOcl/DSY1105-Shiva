@@ -1,13 +1,18 @@
 package cl.duoc.tecmundo.model
 
-// solicitud de aplicacion que publica un productor, es lo que ve el aplicador en su pantalla
+import com.google.gson.annotations.SerializedName
+
 data class ApplicationRequest(
-    val id: Int,              // identificador unico de la solicitud
-    val farmName: String,     // nombre del fundo o parcela
-    val distanceKm: Int,      // distancia entre el campo y el aplicador
-    val status: String,       // estado, ej: PENDIENTE
-    val product: String,      // tipo de producto: granulado o liquido
-    val hectares: Int,        // superficie a aplicar
-    val schedule: String,     // horario de aplicacion: diurna o nocturna
-    val imageRes: Int? = null // foto del campo, si es null se usa una por defecto
+    val id: Int = 0,
+    @SerializedName("farm_name") val farmName: String,
+    @SerializedName("distance_km") val distanceKm: Int = 10,
+    val status: String = "PENDIENTE",
+    val product: String,
+    val hectares: Int,
+    val schedule: String,
+    val imageRes: Int? = null,
+    @SerializedName("evidence_image") val imagePath: String? = null,
+    @SerializedName("has_water") val hasWater: Boolean = true,
+    val notes: String = "",
+    @SerializedName("parcel_id") val parcelId: Long = 0
 )
