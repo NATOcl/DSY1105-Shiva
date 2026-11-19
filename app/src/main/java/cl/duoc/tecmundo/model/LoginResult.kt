@@ -5,6 +5,9 @@ sealed interface LoginResult {
     // correo, clave y perfil correctos: login exitoso
     data object Success : LoginResult
 
+    // correo y clave correctos y el correo es de administrador
+    data object AdminSuccess : LoginResult
+
     // el correo no existe o la clave no coincide
     data object InvalidCredentials : LoginResult
 

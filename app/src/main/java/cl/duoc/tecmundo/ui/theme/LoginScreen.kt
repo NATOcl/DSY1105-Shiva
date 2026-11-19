@@ -56,7 +56,7 @@ fun LoginScreen(
             title = {
                 Text(
                     when (result) {
-                        is LoginResult.Success -> "Inicio de sesión exitoso"
+                        is LoginResult.Success, is LoginResult.AdminSuccess -> "Inicio de sesión exitoso"
                         is LoginResult.InvalidCredentials -> "No se pudo iniciar sesión"
                         is LoginResult.NoProfile -> "Perfil no encontrado"
                     }
@@ -65,7 +65,7 @@ fun LoginScreen(
             text = {
                 Text(
                     when (result) {
-                        is LoginResult.Success -> "Iniciaste sesión como $profileName."
+                        is LoginResult.AdminSuccess -> "Iniciaste sesión como administrador."
                         is LoginResult.InvalidCredentials -> "El correo o la contraseña no son correctos."
                         is LoginResult.NoProfile -> "No tienes perfil de $profileName."
                     }
@@ -74,8 +74,9 @@ fun LoginScreen(
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.onResultHandled()
-                    if (result is LoginResult.Success) onLoggedIn()
-                }) { Text(if (result is LoginResult.Success) "Continuar" else "Aceptar") }
+                    // en los dos exitos (normal y admin) se sale del login
+                    if (result is LoginResult.Success || result is LoginResult.AdminSuccess) onLoggedIn()
+                }) { Text(if (result is LoginResult.Success || result is LoginResult.AdminSuccess) "Continuar" else "Aceptar") }
             }
         )
     }

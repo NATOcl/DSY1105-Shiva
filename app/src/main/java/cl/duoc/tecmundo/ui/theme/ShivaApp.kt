@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import cl.duoc.tecmundo.model.ProfileType
+import cl.duoc.tecmundo.model.Validators
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.tecmundo.ui.theme.AdminHomeScreen
@@ -37,7 +38,6 @@ fun ShivaApp(
 ) {
     var currentScreen by rememberSaveable { mutableStateOf(AppScreen.WELCOME) }
     var loginProfile by rememberSaveable { mutableStateOf(ProfileType.PRODUCTOR) }
-    var adminMode by rememberSaveable { mutableStateOf(false) }
 
     val activeUser by session.activeUser.collectAsStateWithLifecycle()
     val user = activeUser
@@ -55,10 +55,11 @@ fun ShivaApp(
     SideEffect {
         val window = (view.context as Activity).window
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
-            user != null || adminMode || currentScreen != AppScreen.WELCOME
+            user != null || currentScreen != AppScreen.WELCOME
     }
-    if (adminMode) {
-        AdminHomeScreen(onLogOut = { adminMode = false })
+    if (user != null && Validators.isAdminEmail(user.email)) {
+        // sesion con correo @adminshiva.com: se abre el panel de administracion
+        AdminHomeScreen(onLogOut = { session.logOut() })
     } else if (user != null) {
         when (user.profile) {
             ProfileType.PRODUCTOR -> {
@@ -133,7 +134,7 @@ fun ShivaApp(
         when (currentScreen) {
             AppScreen.WELCOME -> WelcomeScreen(
                 onCreateAccount = { currentScreen = AppScreen.REGISTER },
-                onAdmin = { adminMode = true },
+
                 onLogin = { profile ->
                     loginProfile = profile
                     currentScreen = AppScreen.LOGIN

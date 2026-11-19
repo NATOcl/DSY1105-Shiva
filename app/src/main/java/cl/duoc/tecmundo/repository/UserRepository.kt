@@ -6,6 +6,7 @@ import cl.duoc.tecmundo.model.ProfileType
 import cl.duoc.tecmundo.model.UserAccount
 import cl.duoc.tecmundo.model.UserDao
 import cl.duoc.tecmundo.model.UserEntity
+import cl.duoc.tecmundo.model.Validators
 import cl.duoc.tecmundo.remote.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -57,6 +58,8 @@ class UserRepository(private val dao: UserDao) {
     suspend fun logIn(email: String, password: String, profile: ProfileType): LoginResult {
         val cleanEmail = email.trim()
         val localUser = dao.findByEmail(cleanEmail)
+        // si el correo es de admin no se compara el perfil
+        val isAdmin = Validators.isAdminEmail(cleanEmail)
 
         // Si ya existe en este teléfono, valida localmente
         if (localUser != null) {
@@ -64,9 +67,9 @@ class UserRepository(private val dao: UserDao) {
                 PasswordHasher.verify(password, localUser.passwordSalt, localUser.passwordHash)
             }
             if (!passwordOk) return LoginResult.InvalidCredentials
-            if (localUser.profile != profile.name) return LoginResult.NoProfile(profile)
+            if (!isAdmin && localUser.profile != profile.name) return LoginResult.NoProfile(profile)
             dao.openSession(localUser.id)
-            return LoginResult.Success
+            return if (isAdmin) LoginResult.AdminSuccess else LoginResult.Success
         }
 
         // Si es otro móvil (o se borraron datos), consulta en Xano
@@ -87,12 +90,12 @@ class UserRepository(private val dao: UserDao) {
             PasswordHasher.verify(password, remoteSalt, remoteHash)
         }
         if (!passwordOk) return LoginResult.InvalidCredentials
-        if (remoteUser.profile != profile) return LoginResult.NoProfile(profile)
+        if (!isAdmin && remoteUser.profile != profile) return LoginResult.NoProfile(profile)
 
         // Guarda una copia en Room del nuevo móvil y abre sesión
         val newId = dao.insert(remoteUser.toEntity(remoteHash, remoteSalt))
         dao.openSession(newId)
-        return LoginResult.Success
+        return if (isAdmin) LoginResult.AdminSuccess else LoginResult.Success
     }
 
     suspend fun logOut() = dao.closeSession()

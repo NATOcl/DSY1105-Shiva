@@ -45,7 +45,6 @@ import cl.duoc.tecmundo.viewmodel.WelcomeViewModel
 fun WelcomeScreen(
     onCreateAccount: () -> Unit,
     onLogin: (ProfileType) -> Unit,
-    onAdmin: () -> Unit = {},   // el administrador entra sin login, solo eligiendo el perfil
     viewModel: WelcomeViewModel = viewModel()
 ) {
     // si ya hay cuenta, mostramos un aviso abajo
@@ -158,10 +157,6 @@ fun WelcomeScreen(
                 showLogin = false
                 onLogin(profile)
             },
-            onAdmin = {
-                showLogin = false
-                onAdmin()
-            },
             onDismiss = { showLogin = false }
         )
     }
@@ -172,7 +167,6 @@ fun WelcomeScreen(
 @Composable
 private fun LoginProfileSheet(
     onSelect: (ProfileType) -> Unit,
-    onAdmin: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -225,9 +219,6 @@ private fun LoginProfileSheet(
             Spacer(Modifier.height(12.dp))
             ProfileOption(R.drawable.ic_drone, "Entrar como aplicador",
                 "Revisa trabajos y envía ofertas") { closeThen { onSelect(ProfileType.APLICADOR) } }
-            Spacer(Modifier.height(12.dp))
-            ProfileOption(R.drawable.ic_logo, "Entrar como administrador",
-                "Revisa los datos de aplicadores y productores") { closeThen { onAdmin() } }
             Spacer(Modifier.height(24.dp))
         }
     }

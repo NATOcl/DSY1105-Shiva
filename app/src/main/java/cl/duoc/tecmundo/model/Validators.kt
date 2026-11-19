@@ -42,6 +42,14 @@ object Validators {
         }
     }
 
+    // los correos que terminan en admin@adminshiva.com son de administrador
+    private const val ADMIN_DOMAIN = "@adminshiva.com"
+
+    // true si el correo es de administrador
+    // (trim saca espacios y lowercase ignora mayusculas)
+    fun isAdminEmail(value: String): Boolean =
+        value.trim().lowercase().endsWith(ADMIN_DOMAIN)
+
     // telefono: solo celulares chilenos
     fun phoneError(value: String): String? {
         if (value.isBlank()) return "Ingresa tu teléfono"
