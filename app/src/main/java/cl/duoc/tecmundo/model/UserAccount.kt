@@ -1,15 +1,16 @@
 package cl.duoc.tecmundo.model
 
-import android.provider.ContactsContract
-
-// los datos de la cuenta que guardamos localmente
+import com.google.gson.annotations.SerializedName
 
 data class UserAccount(
-    val profile: ProfileType, // productor o aplicador
-    val fullName: String, // nombre completo
-    val rut: String, // rut
-    val email: String, // email
-    val phone: String, // telefono
-    val farmName: String //nombre campo - parcela
-
+    @SerializedName("profile_type") val profile: ProfileType,
+    @SerializedName("name") val fullName: String,
+    val rut: String,
+    val email: String,
+    val phone: String,
+    @SerializedName("farm_name") val farmName: String,
+    @SerializedName("profile_image") val profileImage: String? = null,
+    @SerializedName("password_hash") val passwordHash: String? = null,
+    @SerializedName("password_salt") val passwordSalt: String? = null,
+    val id: Long = 0
 )

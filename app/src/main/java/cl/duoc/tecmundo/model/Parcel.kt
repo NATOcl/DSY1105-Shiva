@@ -1,13 +1,15 @@
 package cl.duoc.tecmundo.model
 
-// una parcela que registra el productor (se guarda en room, en la tabla "parcels")
+import com.google.gson.annotations.SerializedName
+
 data class Parcel(
-    val id: Long,         // identificador unico, lo usa la lista para no repetir tarjetas
-    val name: String,     // nombre del campo
-    val crop: String,     // cultivo (maiz, trigo, etc)
-    val hectares: Int,    // superficie en hectareas
-    val zone: String = "", // zona referencial (texto manual, sin ubicacion precisa)
-    val photoPath: String? = null, // ruta de la foto del terreno
-    val hasWater: Boolean = true,
-    val obstacles: String = ""
+    val id: Long = 0,
+    val name: String,
+    val crop: String,
+    val hectares: Int,
+    val zone: String = "",
+    @SerializedName("photo_path") val photoPath: String? = null,
+    @SerializedName("has_water") val hasWater: Boolean = true,
+    val obstacles: String = "",
+    @SerializedName("owner_rut") val ownerRut: String = ""
 )

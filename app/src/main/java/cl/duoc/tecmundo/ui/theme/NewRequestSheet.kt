@@ -29,28 +29,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cl.duoc.tecmundo.R
+import cl.duoc.tecmundo.model.ApplicationRequest
 import cl.duoc.tecmundo.model.Parcel
 import cl.duoc.tecmundo.ui.ShivaTextField
 import kotlinx.coroutines.launch
 
-// ventana "Nueva solicitud": sube desde abajo al tocar "Solicitar aplicacion" en una parcela
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewRequestSheet(
-    parcel: Parcel,              // la parcela para la que se pide la aplicacion
-    onDismiss: () -> Unit,       // se cerro sin publicar
-    onPublish: () -> Unit        // se toco "Publicar solicitud" y todo estaba bien
+    parcel: Parcel,
+    onDismiss: () -> Unit,
+    onPublish: (ApplicationRequest) -> Unit
 ) {
-    // lo que el usuario va eligiendo o escribiendo (rememberSaveable lo conserva si gira el telefono)
     var product by rememberSaveable { mutableStateOf("Granulado") }
     var hectares by rememberSaveable { mutableStateOf("") }
     var schedule by rememberSaveable { mutableStateOf("Diurna") }
     var hasWater by rememberSaveable { mutableStateOf(true) }
     var comments by rememberSaveable { mutableStateOf("") }
-    // el error de la superficie solo se muestra despues de que el usuario intento publicar
     var touched by rememberSaveable { mutableStateOf(false) }
 
-    // revisa la superficie: tiene que ser un numero, mayor que 0 y sin pasar las hectareas de la parcela
     val number = hectares.toIntOrNull()
     val hectaresError = when {
         number == null -> "Ingresa la superficie a aplicar"
@@ -62,7 +59,6 @@ fun NewRequestSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
-    // primero se baja la ventana con animacion y despues se hace lo que corresponda
     fun closeThen(action: () -> Unit) {
         scope.launch {
             sheetState.hide()
@@ -85,7 +81,6 @@ fun NewRequestSheet(
                 .verticalScroll(rememberScrollState())
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 16.dp)
         ) {
-            // nombre de la parcela, titulo y boton para cerrar
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f)) {
                     Text(parcel.name.uppercase(), color = HomeColors.Eyebrow, fontWeight = FontWeight.Bold,
@@ -105,16 +100,14 @@ fun NewRequestSheet(
             }
             Spacer(Modifier.height(20.dp))
 
-            // cada RequestChoiceRow es una fila de opciones (mas abajo en este mismo archivo)
             RequestChoiceRow("TIPO DE PRODUCTO", listOf("Granulado", "Líquido"), product) { product = it }
 
-            // superficie: ShivaTextField es el mismo campo que usas en NewParcelScreen
             ShivaTextField(
                 "SUPERFICIE A APLICAR",
                 hectares,
-                "Hasta ${parcel.hectares} ha",              // el maximo es la superficie de la parcela
+                "Hasta ${parcel.hectares} ha",
                 if (touched) hectaresError else null,
-                { hectares = it.filter(Char::isDigit).take(5) },   // solo deja escribir numeros
+                { hectares = it.filter(Char::isDigit).take(5) },
                 { touched = true },
                 KeyboardType.Number
             )
@@ -130,14 +123,27 @@ fun NewRequestSheet(
             )
 
             Spacer(Modifier.height(16.dp))
-            // boton publicar
             Row(
                 Modifier.fillMaxWidth().height(56.dp)
                     .clip(RoundedCornerShape(18.dp))
                     .background(HomeColors.Title)
                     .clickable {
-                        touched = true                                  // ahora si se muestran los errores
-                        if (hectaresError == null) closeThen(onPublish) // solo publica si esta todo bien
+                        touched = true
+                        if (hectaresError == null && number != null) {
+                            val nuevaSolicitud = ApplicationRequest(
+                                farmName = parcel.name,
+                                distanceKm = 12,
+                                status = "PENDIENTE",
+                                product = product,
+                                hectares = number,
+                                schedule = schedule,
+                                imagePath = "bg_wheat",
+                                hasWater = hasWater,
+                                notes = comments.trim(),
+                                parcelId = parcel.id
+                            )
+                            closeThen { onPublish(nuevaSolicitud) }
+                        }
                     }
                     .padding(start = 20.dp, end = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -155,7 +161,6 @@ fun NewRequestSheet(
     }
 }
 
-// fila de opciones para elegir una (ej. Granulado / Liquido)
 @Composable
 private fun RequestChoiceRow(
     label: String,
@@ -172,7 +177,6 @@ private fun RequestChoiceRow(
             Box(
                 Modifier.weight(1f).height(48.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    // la opcion elegida va amarilla suave con borde amarillo; las otras blancas
                     .background(if (activa) Color(0xFFFFF1BF) else Color.White)
                     .border(1.dp, if (activa) ShivaColors.Yellow else ShivaColors.Border, RoundedCornerShape(14.dp))
                     .clickable { onSelect(option) },

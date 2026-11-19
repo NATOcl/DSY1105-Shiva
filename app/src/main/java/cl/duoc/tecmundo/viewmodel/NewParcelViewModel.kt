@@ -3,7 +3,6 @@ package cl.duoc.tecmundo.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import cl.duoc.tecmundo.model.AppDatabase
 import cl.duoc.tecmundo.model.Validators
 import cl.duoc.tecmundo.repository.ParcelRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +13,6 @@ import kotlinx.coroutines.launch
 
 enum class ParcelField { NAME, CROP, HECTARES, ZONE }
 
-// todo lo que el formulario de nueva parcela necesita mostrar
 data class NewParcelUiState(
     val name: String = "",
     val crop: String = "",
@@ -25,7 +23,6 @@ data class NewParcelUiState(
     val obstacles: String = "",
     val touched: Set<ParcelField> = emptySet()
 ) {
-    // los errores solo salen cuando el campo ya fue tocado
     val nameError get() = if (ParcelField.NAME in touched) Validators.parcelNameError(name) else null
     val cropError get() = if (ParcelField.CROP in touched) Validators.cropError(crop) else null
     val hectaresError get() = if (ParcelField.HECTARES in touched) Validators.hectaresError(hectares) else null
@@ -40,39 +37,36 @@ data class NewParcelUiState(
 
 class NewParcelViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val repo = ParcelRepository(AppDatabase.get(app).parcelDao())
+    private val repo = ParcelRepository()
 
     private val _state = MutableStateFlow(NewParcelUiState())
     val state: StateFlow<NewParcelUiState> = _state.asStateFlow()
 
     fun onNameChange(v: String) = _state.update { it.copy(name = v) }
     fun onCropChange(v: String) = _state.update { it.copy(crop = v) }
-    // la superficie solo acepta digitos
     fun onHectaresChange(v: String) = _state.update { it.copy(hectares = v.filter(Char::isDigit).take(5)) }
     fun onZoneChange(v: String) = _state.update { it.copy(zone = v) }
-
     fun onPhotoChange(path: String?) = _state.update { it.copy(photoPath = path) }
-
     fun onWaterChange(v: Boolean) = _state.update { it.copy(hasWater = v) }
-
     fun onObstaclesChange(v: String) = _state.update { it.copy(obstacles = v.take(80)) }
-
     fun onFieldBlur(field: ParcelField) = _state.update { it.copy(touched = it.touched + field) }
 
-    // deja el formulario vacío para la próxima vez que se abra
     fun reset() {
         _state.value = NewParcelUiState()
     }
 
-    // valida todo; si esta bien guarda la parcela y avisa a la pantalla
     fun onSubmit(ownerRut: String, onSaved: () -> Unit) {
         _state.update { it.copy(touched = ParcelField.entries.toSet()) }
         val s = _state.value
         if (!s.isValid) return
         viewModelScope.launch {
-            repo.save(ownerRut, s.name, s.crop, s.hectares.toInt(), s.zone, s.photoPath,  s.hasWater, s.obstacles)
-            reset()
-            onSaved()
+            try {
+                repo.save(ownerRut, s.name, s.crop, s.hectares.toInt(), s.zone, s.photoPath, s.hasWater, s.obstacles)
+                reset()
+                onSaved()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

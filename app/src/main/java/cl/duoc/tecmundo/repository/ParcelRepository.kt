@@ -1,34 +1,33 @@
 package cl.duoc.tecmundo.repository
 
 import cl.duoc.tecmundo.model.Parcel
-import cl.duoc.tecmundo.model.ParcelDao
-import cl.duoc.tecmundo.model.ParcelEntity
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import cl.duoc.tecmundo.remote.RetrofitInstance
 
-// guarda y lee las parcelas desde Room
-class ParcelRepository(private val dao: ParcelDao) {
+class ParcelRepository {
 
-    // las parcelas de un productor, listas para mostrar
-    fun parcelsOf(ownerRut: String): Flow<List<Parcel>> =
-        dao.parcelsOf(ownerRut).map { list ->
-            list.map { Parcel(it.id, it.name, it.crop, it.hectares, it.zone, it.photoPath, it.hasWater, it.obstacles) }
-        }
+    suspend fun parcelsOf(ownerRut: String): List<Parcel> {
+        return RetrofitInstance.api.obtenerParcelas()
+            .filter { it.ownerRut == ownerRut }
+    }
 
-    // guarda una parcela nueva
     suspend fun save(
         ownerRut: String, name: String, crop: String, hectares: Int, zone: String,
         photoPath: String?, hasWater: Boolean, obstacles: String
     ) {
-        dao.insert(
-            ParcelEntity(
-                ownerRut = ownerRut, name = name.trim(), crop = crop.trim(),
-                hectares = hectares, zone = zone.trim(), photoPath = photoPath,
-                hasWater = hasWater, obstacles = obstacles.trim()
-            )
+        val nueva = Parcel(
+            ownerRut = ownerRut,
+            name = name.trim(),
+            crop = crop.trim(),
+            hectares = hectares,
+            zone = zone.trim(),
+            photoPath = photoPath,
+            hasWater = hasWater,
+            obstacles = obstacles.trim()
         )
+        RetrofitInstance.api.crearParcela(nueva)
     }
 
-    // elimina una parcela por su id
-    suspend fun delete(id: Long) = dao.delete(id)
+    suspend fun delete(id: Long) {
+        RetrofitInstance.api.eliminarParcela(id)
+    }
 }

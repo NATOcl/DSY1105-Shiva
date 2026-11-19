@@ -6,31 +6,53 @@ import androidx.lifecycle.viewModelScope
 import cl.duoc.tecmundo.model.AppDatabase
 import cl.duoc.tecmundo.model.Parcel
 import cl.duoc.tecmundo.repository.ParcelRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// las parcelas del productor que tiene la sesion abierta
 class ParcelListViewModel(app: Application) : AndroidViewModel(app) {
 
     private val db = AppDatabase.get(app)
-    private val repo = ParcelRepository(db.parcelDao())
+    private val repo = ParcelRepository()
 
-    // si cambia la sesion, la lista cambia sola (sin sesion = lista vacia)
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val parcels: StateFlow<List<Parcel>> = db.userDao().activeUser()
-        .flatMapLatest { user ->
-            if (user == null) flowOf(emptyList()) else repo.parcelsOf(user.rut)
+    private val _parcels = MutableStateFlow<List<Parcel>>(emptyList())
+    val parcels: StateFlow<List<Parcel>> = _parcels.asStateFlow()
+
+    private var currentRut: String? = null
+
+    init {
+        viewModelScope.launch {
+            db.userDao().activeUser().collect { user ->
+                currentRut = user?.rut
+                refresh()
+            }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    }
 
-    // elimina la parcela; launch la ejecuta en segundo plano
-    // la lista "parcels" se actualiza sola porque viene de un Flow de Room
+    fun refresh() {
+        val rut = currentRut
+        if (rut == null) {
+            _parcels.value = emptyList()
+            return
+        }
+        viewModelScope.launch {
+            try {
+                _parcels.value = repo.parcelsOf(rut)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun deleteParcel(id: Long) {
-        viewModelScope.launch { repo.delete(id) }
+        viewModelScope.launch {
+            try {
+                repo.delete(id)
+                refresh()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }
