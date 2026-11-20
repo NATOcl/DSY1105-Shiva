@@ -42,12 +42,12 @@ fun AdminHomeScreen(
                 letterSpacing = 2.sp, color = HomeColors.Eyebrow)
             Spacer(Modifier.height(6.dp))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("Datos de prueba", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
+                Text("Resumen General", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
                     color = HomeColors.Title, letterSpacing = (-0.5).sp, modifier = Modifier.weight(1f))
                 CountPill("Simulados")
             }
             Spacer(Modifier.height(8.dp))
-            Text("Información ficticia para probar el MVP. Solo lectura.",
+            Text("Información para probar el MVP. Solo lectura.",
                 fontSize = 14.sp, color = HomeColors.Subtitle, lineHeight = 20.sp)
 
             Spacer(Modifier.height(16.dp))
