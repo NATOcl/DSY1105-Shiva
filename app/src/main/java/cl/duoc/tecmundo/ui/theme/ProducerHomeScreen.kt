@@ -36,7 +36,9 @@ fun ProducerHomeScreen(
     userName: String,                       // nombre que sale arriba a la derecha
     parcels: List<Parcel> = emptyList(),    // parcelas del productor, vacia si todavia no registra ninguna
     onAddParcel: () -> Unit = {},           // que pasa al tocar "Anadir nueva parcela"
-    onLogOut: () -> Unit = {}                 // se llama al tocar "Cerrar sesión" en el menu lateral
+    onParcelClick: (Parcel) -> Unit = {},   // al tocar la tarjeta de la parcela
+    onRequestClick: (Parcel) -> Unit = {},  // al tocar "+ Solicitar aplicación"
+    onLogOut: () -> Unit = {}               // se llama al tocar "Cerrar sesión" en el menu lateral
 ) {
     // el avatar abre el menu lateral del perfil, donde esta el boton para cerrar sesion
     ProfileDrawerHost(userName = userName, role = "Productor", onLogOut = onLogOut) { openDrawer ->
@@ -63,7 +65,13 @@ fun ProducerHomeScreen(
             Spacer(Modifier.height(20.dp))
             // lista con scroll: primero las parcelas y al final el boton de anadir
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(parcels, key = { it.id }) { ParcelCard(it) }
+                items(parcels, key = { it.id }) { parcel ->
+                    ParcelCard(
+                        parcel = parcel,
+                        onCardClick = { onParcelClick(parcel) },
+                        onRequestClick = { onRequestClick(parcel) }
+                    )
+                }
                 item { AddParcelCard(onAddParcel) }
             }
         }
@@ -106,9 +114,14 @@ private fun AddParcelCard(onClick: () -> Unit) {
         }
     }
 }
+
 // tarjeta de una parcela: la foto es el fondo, con los datos encima
 @Composable
-private fun ParcelCard(parcel: Parcel) {
+private fun ParcelCard(
+    parcel: Parcel,
+    onCardClick: () -> Unit,
+    onRequestClick: () -> Unit
+) {
     // convierte la ruta de la foto en imagen (null si la parcela no tiene foto)
     val imagen = remember(parcel.photoPath) {
         parcel.photoPath?.let {
@@ -120,7 +133,12 @@ private fun ParcelCard(parcel: Parcel) {
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))) {
 
         // parte de arriba: foto de fondo + capa oscura + textos
-        Box(Modifier.fillMaxWidth().background(Color(0xFF4A3A00))) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF4A3A00))
+                .clickable(onClick = onCardClick)
+        ) {
             if (imagen != null) {
                 Image(imagen, "Foto de la parcela", Modifier.matchParentSize(),
                     contentScale = ContentScale.Crop)
@@ -163,9 +181,12 @@ private fun ParcelCard(parcel: Parcel) {
             }
         }
 
-
         Box(
-            Modifier.fillMaxWidth().background(ShivaColors.Yellow).padding(vertical = 14.dp),
+            Modifier
+                .fillMaxWidth()
+                .background(ShivaColors.Yellow)
+                .clickable(onClick = onRequestClick)
+                .padding(vertical = 14.dp),
             contentAlignment = Alignment.Center
         ) {
             Text("+  Solicitar aplicación", fontSize = 13.sp, fontWeight = FontWeight.Bold,

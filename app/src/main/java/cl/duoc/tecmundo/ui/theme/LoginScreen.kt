@@ -65,6 +65,7 @@ fun LoginScreen(
             text = {
                 Text(
                     when (result) {
+                        is LoginResult.Success -> "Bienvenido de nuevo."
                         is LoginResult.AdminSuccess -> "Iniciaste sesión como administrador."
                         is LoginResult.InvalidCredentials -> "El correo o la contraseña no son correctos."
                         is LoginResult.NoProfile -> "No tienes perfil de $profileName."
