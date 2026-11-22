@@ -66,10 +66,20 @@ dependencies {
 
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
+
+    // Kotest: sirve para escribir y ejecutar los tests
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
+    // Kotest: trae "shouldBe" para comparar resultados
+    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+// Obligatorio para Kotest: ejecuta los tests con JUnit 5
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
