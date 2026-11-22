@@ -23,19 +23,57 @@
 
 ## Proyecto: Shiva
 
-**Shiva** es una aplicación móvil de agricultura desarrollada como parte de las evaluaciones del curso.
-Está hecha con **Kotlin**.
+**Shiva** es una aplicación móvil para el agro que conecta a **productores agrícolas** con **aplicadores de servicios** (fumigación, fertilización, monitoreo aéreo, entre otros).
 
+La idea es simple: el productor publica lo que necesita en su parcela y el aplicador encuentra trabajos cercanos, revisa los detalles y envía una oferta.
 
-### Pantallas
+### ¿Qué puedes hacer?
 
-1. **Bienvenida:** foto de fondo, título y botón "Comenzar ahora".
-2. **Registro:** formulario con checkbox de términos. El botón "Crear mi cuenta" se activa solo al marcar el check.
+**Como productor**
+- Crear una cuenta e iniciar sesión.
+- Registrar tus parcelas con ubicación referencial, cultivo, superficie, disponibilidad de agua, obstáculos y una foto.
+- Revisar los detalles de cada parcela y eliminarla cuando ya no la necesites.
+- Publicar solicitudes de aplicación indicando producto, superficie, horario y comentarios.
 
-## Ramas
+**Como aplicador**
+- Completar un perfil con los servicios y productos que aplicas, horarios, cultivos, zonas de cobertura, capacidad y experiencia.
+- Activar o desactivar tu disponibilidad para recibir nuevas solicitudes.
+- Revisar solicitudes cercanas y enviar una oferta con tu precio por hectárea.
 
-- `main`: versión base del proyecto.
-- `feature/shiva-mockup`: Seccion experimental del proyecto.
+**Como administrador**
+- Ver un resumen de solo lectura con usuarios, aplicadores y solicitudes de ejemplo para revisar el funcionamiento del MVP.
+
+### Características principales
+
+- Registro con validación de datos (RUT, correo, teléfono y contraseña) y aceptación de términos.
+- Acceso diferenciado según el tipo de perfil.
+- Información guardada en el dispositivo y sincronizada con el servicio en la nube cuando hay conexión.
+- Interfaz pensada para uso en terreno, con navegación simple y mensajes claros.
+
+> Proyecto académico en etapa de MVP. Algunos datos del panel de administración son simulados y no corresponden a personas reales.
+
+### Requisitos
+
+- Android Studio.
+- Android 7.0 o superior.
+- Conexión a internet para sincronizar la información con el servicio en la nube.
+
+### Cómo ejecutar
+
+1. Clona el repositorio.
+2. Abre el proyecto en Android Studio.
+3. Espera a que se complete la sincronización de Gradle.
+4. Ejecuta la app en un emulador o en un dispositivo Android.
+
+### Pruebas
+
+El proyecto incluye pruebas unitarias para las reglas de validación de los formularios.
+
+### Ramas
+
+- `main`: versión estable del proyecto.
+- `feature/shiva-mockup`: sección experimental del proyecto.
+- `backup`: respaldo de versiones anteriores.
 
 ---
 
